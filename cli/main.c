@@ -2,6 +2,7 @@
 
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
+#include "gpu/vk_config.h"
 
 typedef struct cli_state_s
 {
@@ -15,15 +16,18 @@ init_cli_state (cli_state_t *cli)
   cli->dp = NULL;
   cli->gpu = NULL;
 
-  if (gpu_device_new (&cli->gpu))
-    {
-      fprintf (stderr, "failed to create GPU device\n");
-      return 1;
-    }
-
   if (sdl_display_new (&cli->dp))
     {
       fprintf (stderr, "failed to create SDL display\n");
+      return 1;
+    }
+
+  struct vk_config_t vk_config;
+  sdl_display_vk_config (cli->dp, &vk_config);
+
+  if (gpu_device_new (&cli->gpu, &vk_config))
+    {
+      fprintf (stderr, "failed to create GPU device\n");
       return 1;
     }
 
