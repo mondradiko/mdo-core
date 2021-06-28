@@ -11,19 +11,19 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
+#include <SDL2/SDL_vulkan.h>
 #include <vulkan/vulkan_core.h>
 
 struct sdl_display_s
 {
   SDL_Window *window;
+
+  char *instance_extensions;
 };
 
-int
-sdl_display_new (sdl_display_t **new_dp)
+static int
+create_window (sdl_display_t *dp)
 {
-  sdl_display_t *dp = malloc (sizeof (sdl_display_t));
-  *new_dp = dp;
-
   dp->window = SDL_CreateWindow ("Mondradiko Core", SDL_WINDOWPOS_UNDEFINED,
                                  SDL_WINDOWPOS_UNDEFINED, 800, 600,
                                  SDL_WINDOW_SHOWN | SDL_WINDOW_VULKAN);
@@ -38,11 +38,61 @@ sdl_display_new (sdl_display_t **new_dp)
   return 0;
 }
 
+static int
+get_instance_extensions (sdl_display_t *dp)
+{
+  unsigned int num_exts = 16;
+  const char *ext_list[num_exts];
+  SDL_Vulkan_GetInstanceExtensions (dp->window, &num_exts, ext_list);
+
+  int list_len = num_exts; /* room for spaces and null terminator */
+  for (int i = 0; i < num_exts; i++)
+    {
+      list_len += strlen (ext_list[i]);
+    }
+
+  dp->instance_extensions = malloc (list_len);
+  char *ptr = dp->instance_extensions;
+  for (int i = 0; i < num_exts; i++)
+    {
+      size_t element_len = strlen (ext_list[i]);
+      memcpy (ptr, ext_list[i], element_len);
+      ptr += element_len;
+
+      if (i < num_exts - 1)
+        *ptr++ = ' '; /* add space */
+    }
+
+  *ptr = '\0'; /* add null terminator */
+
+  return 0;
+}
+
+int
+sdl_display_new (sdl_display_t **new_dp)
+{
+  sdl_display_t *dp = malloc (sizeof (sdl_display_t));
+  *new_dp = dp;
+
+  dp->instance_extensions = NULL;
+
+  if (create_window (dp))
+    return -1;
+
+  if (get_instance_extensions (dp))
+    return -1;
+
+  return 0;
+}
+
 void
 sdl_display_delete (sdl_display_t *dp)
 {
   if (dp->window)
     SDL_DestroyWindow (dp->window);
+
+  if (dp->instance_extensions)
+    free (dp->instance_extensions);
 
   free (dp);
 }
@@ -52,8 +102,7 @@ sdl_display_vk_config (sdl_display_t *dp, struct vk_config_t *config)
 {
   config->min_api_version = VK_API_VERSION_1_0;
   config->max_api_version = VK_API_VERSION_1_2;
-  /* TODO(marceline-cramer): query and cache extensions */
-  config->instance_extensions = "";
+  config->instance_extensions = dp->instance_extensions;
   config->device_extensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
