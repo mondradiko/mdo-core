@@ -3,12 +3,15 @@
 
 #include "displays/sdl/sdl_display.h"
 
+#include "gpu/vk_config.h"
+
 /* TODO(marceline-cramer): replace with mdo_allocator */
-#include <SDL2/SDL_error.h>
 #include <stdio.h>  /* for fprintf */
 #include <stdlib.h> /* for mem alloc*/
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_error.h>
+#include <vulkan/vulkan_core.h>
 
 struct sdl_display_s
 {
@@ -42,6 +45,16 @@ sdl_display_delete (sdl_display_t *dp)
     SDL_DestroyWindow (dp->window);
 
   free (dp);
+}
+
+void
+sdl_display_vk_config (sdl_display_t *dp, struct vk_config_t *config)
+{
+  config->min_api_version = VK_API_VERSION_1_0;
+  config->max_api_version = VK_API_VERSION_1_2;
+  /* TODO(marceline-cramer): query and cache extensions */
+  config->instance_extensions = "";
+  config->device_extensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
 void

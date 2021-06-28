@@ -3,6 +3,8 @@
 
 #include "gpu/gpu_device.h"
 
+#include "gpu/vk_config.h"
+
 /* TODO(marceline-cramer): use mdo-allocator */
 #include <stdlib.h> /* for mem alloc */
 /* TODO(marceline-cramer): custom logging */
@@ -27,7 +29,7 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 }
 
 int
-gpu_device_new (gpu_device_t **new_gpu)
+gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 {
   gpu_device_t *gpu = malloc (sizeof (gpu_device_t));
   *new_gpu = gpu;
