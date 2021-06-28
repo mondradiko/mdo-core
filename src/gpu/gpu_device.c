@@ -76,31 +76,9 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   return VK_FALSE;
 }
 
-static VkPhysicalDevice
-autoselect_physical_device (gpu_device_t *gpu)
+static int
+create_instance (gpu_device_t *gpu, const struct vk_config_t *config)
 {
-  uint32_t device_count = 32; /* the user will never have more than 32 GPUs */
-  VkPhysicalDevice devices[device_count];
-
-  /* TODO(marceline-cramer) check this result in the case that the user DOES
-   * have way too many GPUs */
-  vkEnumeratePhysicalDevices (gpu->instance, &device_count, devices);
-
-  /* TODO(marceline-cramer) check for present queue, surface support */
-  if (device_count > 0)
-    return devices[0];
-
-  return VK_NULL_HANDLE;
-}
-
-int
-gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
-{
-  gpu_device_t *gpu = malloc (sizeof (gpu_device_t));
-  *new_gpu = gpu;
-
-  gpu->instance = VK_NULL_HANDLE;
-
   VkApplicationInfo app_info = {
     .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 
@@ -146,10 +124,41 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
     {
       fprintf (stderr, "failed to create Vulkan instance\n");
       free (instance_ext_list);
-      return 1;
+      return -1;
     }
 
   free (instance_ext_list);
+
+  return 0;
+}
+
+static VkPhysicalDevice
+autoselect_physical_device (gpu_device_t *gpu)
+{
+  uint32_t device_count = 32; /* the user will never have more than 32 GPUs */
+  VkPhysicalDevice devices[device_count];
+
+  /* TODO(marceline-cramer) check this result in the case that the user DOES
+   * have way too many GPUs */
+  vkEnumeratePhysicalDevices (gpu->instance, &device_count, devices);
+
+  /* TODO(marceline-cramer) check for present queue, surface support */
+  if (device_count > 0)
+    return devices[0];
+
+  return VK_NULL_HANDLE;
+}
+
+int
+gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
+{
+  gpu_device_t *gpu = malloc (sizeof (gpu_device_t));
+  *new_gpu = gpu;
+
+  gpu->instance = VK_NULL_HANDLE;
+
+  if (create_instance (gpu, config))
+    return -1;
 
   if (config->physical_device != VK_NULL_HANDLE)
     gpu->physical_device = config->physical_device;
