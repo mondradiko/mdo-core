@@ -5,6 +5,8 @@
 
 #include <stdint.h> /* for uint32_t */
 
+#include <vulkan/vulkan_core.h> /* for VkPhysicalDevice */
+
 struct vk_config_t
 {
   /**
@@ -21,4 +23,11 @@ struct vk_config_t
    */
   const char *instance_extensions;
   const char *device_extensions;
+
+  /**
+   * The VkPhysicalDevice to use.
+   *
+   * If set to VK_NULL_HANDLE, the physical device is selected automatically.
+   */
+  VkPhysicalDevice physical_device;
 };
