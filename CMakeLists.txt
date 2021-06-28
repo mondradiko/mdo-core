@@ -3,3 +3,5 @@ project(mdo-core VERSION 0.0.0)
 
 add_executable(hello-world src/main.c)
 
+add_executable(mdo-cli cli/main.c)
+
