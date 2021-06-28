@@ -21,6 +21,7 @@ struct gpu_device_s
   VkInstance instance;
   VkPhysicalDevice physical_device;
   uint32_t gfx_queue_family;
+  VkDevice device;
 };
 
 static int
@@ -171,6 +172,46 @@ find_queue_families (gpu_device_t *gpu)
   return -1;
 }
 
+static int
+create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
+{
+  char *device_ext_list = malloc (strlen (config->device_extensions) + 1);
+  strcpy (device_ext_list, config->device_extensions);
+  const char *device_exts[MAX_EXTENSIONS];
+  int device_ext_num = split_list (device_ext_list, device_exts);
+
+  float queue_priority = 1.0f;
+
+  VkDeviceQueueCreateInfo queue_ci = {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+    .queueFamilyIndex = gpu->gfx_queue_family,
+    .queueCount = 1,
+    .pQueuePriorities = &queue_priority,
+  };
+
+  VkPhysicalDeviceFeatures device_features = {};
+
+  VkDeviceCreateInfo ci = {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+    .queueCreateInfoCount = 1,
+    .pQueueCreateInfos = &queue_ci,
+    .enabledExtensionCount = device_ext_num,
+    .ppEnabledExtensionNames = device_exts,
+    .pEnabledFeatures = &device_features,
+  };
+
+  if (vkCreateDevice (gpu->physical_device, &ci, NULL, &gpu->device)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to create Vulkan logical device");
+      free (device_ext_list);
+      return -1;
+    }
+
+  free (device_ext_list);
+  return 0;
+}
+
 int
 gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 {
@@ -202,6 +243,9 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 void
 gpu_device_delete (gpu_device_t *gpu)
 {
+  if (gpu->device)
+    vkDestroyDevice (gpu->device, NULL);
+
   if (gpu->instance)
     vkDestroyInstance (gpu->instance, NULL);
 
