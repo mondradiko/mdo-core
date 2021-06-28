@@ -8,15 +8,63 @@
 /* TODO(marceline-cramer): use mdo-allocator */
 #include <stdlib.h> /* for mem alloc */
 /* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
+#include <stdio.h>  /* for fprintf */
+#include <string.h> /* for strlen, memcpy */
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
+
+#define MAX_EXTENSIONS 32
 
 struct gpu_device_s
 {
   VkInstance instance;
 };
+
+static int
+split_list (char *list, const char *array[MAX_EXTENSIONS])
+{
+  size_t len = strlen (list);
+  if (len == 0)
+    return 0;
+
+  int num_elements = 0;
+  for (int i = 0; i <= len; i++)
+    {
+      switch (list[i])
+        {
+        case ' ':
+          list[i] = '\n';
+        case '\0':
+          num_elements++;
+        default:
+          break;
+        }
+    }
+
+  fprintf (stdout, "num elements: %d\n%s\n", num_elements, list);
+
+  if (num_elements > MAX_EXTENSIONS)
+    {
+      fprintf (stderr, "ERROR: number of elements in list exceeds maximum\n");
+      return 0;
+    }
+
+  int idx = 0;
+  const char *last_element = list;
+  for (int i = 0; i <= len; i++)
+    {
+      if (list[i] == '\n' || list[i] == '\0')
+        {
+          list[i] = '\0';
+          array[idx] = last_element;
+          last_element = &list[i + 1];
+          idx++;
+        }
+    }
+
+  return num_elements;
+}
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -45,8 +93,13 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
     .pEngineName = "Mondradiko",
     .engineVersion = VK_MAKE_VERSION (0, 0, 0),
 
-    .apiVersion = VK_API_VERSION_1_0,
+    .apiVersion = config->min_api_version,
   };
+
+  char *instance_ext_list = malloc (strlen (config->instance_extensions) + 1);
+  strcpy (instance_ext_list, config->instance_extensions);
+  const char *instance_exts[MAX_EXTENSIONS];
+  int instance_ext_num = split_list (instance_ext_list, instance_exts);
 
   const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
 
@@ -55,7 +108,8 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
     .pApplicationInfo = &app_info,
     .enabledLayerCount = 1,
     .ppEnabledLayerNames = layers,
-    .enabledExtensionCount = 0,
+    .enabledExtensionCount = instance_ext_num,
+    .ppEnabledExtensionNames = instance_exts,
   };
 
   VkDebugUtilsMessengerCreateInfoEXT messenger_ci = {
@@ -74,9 +128,11 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
   if (vkCreateInstance (&ci, NULL, &gpu->instance) != VK_SUCCESS)
     {
       fprintf (stderr, "failed to create Vulkan instance\n");
+      free (instance_ext_list);
       return 1;
     }
 
+  free (instance_ext_list);
   return 0;
 }
 
