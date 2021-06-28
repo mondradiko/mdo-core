@@ -10,4 +10,5 @@ set(MDO_CORE_SRC
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 add_executable(mdo-cli cli/main.c)
+target_link_libraries(mdo-cli mdo-core)
 
