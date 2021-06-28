@@ -43,3 +43,26 @@ sdl_display_delete (sdl_display_t *dp)
 
   free (dp);
 }
+
+void
+sdl_display_poll (sdl_display_t *dp, struct display_poll_t *poll)
+{
+  poll->should_exit = 0;
+  poll->should_render = 1;
+
+  SDL_Event e;
+  while (SDL_PollEvent (&e))
+    {
+      switch (e.type)
+        {
+        case SDL_QUIT:
+          {
+            poll->should_exit = 1;
+            break;
+          }
+
+        default:
+          break;
+        }
+    }
+}
