@@ -12,13 +12,13 @@
 #include <string.h> /* for strlen, memcpy */
 
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 #define MAX_EXTENSIONS 32
 
 struct gpu_device_s
 {
   VkInstance instance;
+  VkPhysicalDevice physical_device;
 };
 
 static int
@@ -74,6 +74,23 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 {
   fprintf (stderr, "vulkan validation: %s\n", callback_data->pMessage);
   return VK_FALSE;
+}
+
+static VkPhysicalDevice
+autoselect_physical_device (gpu_device_t *gpu)
+{
+  uint32_t device_count = 32; /* the user will never have more than 32 GPUs */
+  VkPhysicalDevice devices[device_count];
+
+  /* TODO(marceline-cramer) check this result in the case that the user DOES
+   * have way too many GPUs */
+  vkEnumeratePhysicalDevices (gpu->instance, &device_count, devices);
+
+  /* TODO(marceline-cramer) check for present queue, surface support */
+  if (device_count > 0)
+    return devices[0];
+
+  return VK_NULL_HANDLE;
 }
 
 int
@@ -133,6 +150,18 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
     }
 
   free (instance_ext_list);
+
+  if (config->physical_device != VK_NULL_HANDLE)
+    gpu->physical_device = config->physical_device;
+  else
+    gpu->physical_device = autoselect_physical_device (gpu);
+
+  if (gpu->physical_device == VK_NULL_HANDLE)
+    {
+      fprintf (stderr, "failed to find Vulkan physical device\n");
+      return -1;
+    }
+
   return 0;
 }
 
