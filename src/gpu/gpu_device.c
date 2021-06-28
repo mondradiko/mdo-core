@@ -12,6 +12,7 @@
 #include <string.h> /* for strlen, memcpy */
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #define MAX_EXTENSIONS 32
 
@@ -19,6 +20,7 @@ struct gpu_device_s
 {
   VkInstance instance;
   VkPhysicalDevice physical_device;
+  uint32_t gfx_queue_family;
 };
 
 static int
@@ -149,6 +151,26 @@ autoselect_physical_device (gpu_device_t *gpu)
   return VK_NULL_HANDLE;
 }
 
+static int
+find_queue_families (gpu_device_t *gpu)
+{
+  uint32_t num = 32; /* ultra-conservative upper cap */
+  VkQueueFamilyProperties props[num];
+  vkGetPhysicalDeviceQueueFamilyProperties (gpu->physical_device, &num, props);
+
+  for (int i = 0; i < num; i++)
+    {
+      if (props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+          gpu->gfx_queue_family = i;
+          return 0;
+        }
+    }
+
+  fprintf (stderr, "failed to find necessary queue families\n");
+  return -1;
+}
+
 int
 gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 {
@@ -170,6 +192,9 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
       fprintf (stderr, "failed to find Vulkan physical device\n");
       return -1;
     }
+
+  if (find_queue_families (gpu))
+    return -1;
 
   return 0;
 }
