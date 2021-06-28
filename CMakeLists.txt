@@ -9,6 +9,7 @@ find_package(SDL2 REQUIRED)
 # main library
 set(MDO_CORE_SRC
   src/displays/sdl/sdl_display.c
+  src/gpu/gpu_device.c
 )
 
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
