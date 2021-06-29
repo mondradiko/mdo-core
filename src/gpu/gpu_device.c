@@ -254,3 +254,21 @@ gpu_device_delete (gpu_device_t *gpu)
 
   free (gpu);
 }
+
+VkInstance
+gpu_device_get_instance (gpu_device_t *gpu)
+{
+  if (!gpu->instance)
+    fprintf (stderr, "WARN: getting null Vulkan instance\n");
+
+  return gpu->instance;
+}
+
+VkDevice
+gpu_device_get (gpu_device_t *gpu)
+{
+  if (!gpu->device)
+    fprintf (stderr, "WARN: getting null Vulkan device\n");
+
+  return gpu->device;
+}
