@@ -24,6 +24,10 @@ void gpu_device_delete (gpu_device_t *);
  */
 VkInstance gpu_device_get_instance (gpu_device_t *);
 
+/** @function gpu_device_get_physical
+ */
+VkPhysicalDevice gpu_device_get_physical (gpu_device_t *);
+
 /** @function gpu_device_get
  */
 VkDevice gpu_device_get (gpu_device_t *);

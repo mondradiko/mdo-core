@@ -219,6 +219,8 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
   *new_gpu = gpu;
 
   gpu->instance = VK_NULL_HANDLE;
+  gpu->physical_device = VK_NULL_HANDLE;
+  gpu->device = VK_NULL_HANDLE;
 
   if (create_instance (gpu, config))
     return -1;
@@ -262,6 +264,15 @@ gpu_device_get_instance (gpu_device_t *gpu)
     fprintf (stderr, "WARN: getting null Vulkan instance\n");
 
   return gpu->instance;
+}
+
+VkPhysicalDevice
+gpu_device_get_physical (gpu_device_t *gpu)
+{
+  if (!gpu->physical_device)
+    fprintf (stderr, "WARN: getting null Vulkan physical device\n");
+
+  return gpu->physical_device;
 }
 
 VkDevice
