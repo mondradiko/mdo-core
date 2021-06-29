@@ -15,7 +15,7 @@ typedef struct camera_s camera_t;
 struct camera_config
 {
   gpu_device_t *gpu;
-  viewport_t **viewports;
+  const struct viewport_config *viewport_configs;
   int viewport_num;
 };
 

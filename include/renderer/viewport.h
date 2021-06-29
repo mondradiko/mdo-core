@@ -36,7 +36,7 @@ struct viewport_config
 
 /** @function viewport_new
  */
-int viewport_new (viewport_t **, const struct viewport_config *);
+int viewport_new (viewport_t **, VkRenderPass, const struct viewport_config *);
 
 /** @function viewport_delete
  */

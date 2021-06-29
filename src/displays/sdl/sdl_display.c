@@ -26,7 +26,6 @@ struct sdl_display_s
   /* session data */
   gpu_device_t *gpu;
   VkSurfaceKHR surface;
-  viewport_t *viewport;
   camera_t *camera;
 };
 
@@ -86,7 +85,6 @@ sdl_display_new (sdl_display_t **new_dp)
   dp->instance_extensions = NULL;
   dp->surface = VK_NULL_HANDLE;
   dp->camera = NULL;
-  dp->viewport = NULL;
 
   if (create_window (dp))
     return -1;
@@ -151,15 +149,9 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
     },
   };
 
-  if (viewport_new (&dp->viewport, &vp_config))
-    {
-      fprintf (stderr, "failed to create viewport\n");
-      return 1;
-    }
-
   struct camera_config cam_config = {
     .gpu = dp->gpu,
-    .viewports = &dp->viewport,
+    .viewport_configs = &vp_config,
     .viewport_num = 1,
   };
 
@@ -178,14 +170,10 @@ sdl_display_end_session (sdl_display_t *dp)
   if (dp->camera)
     camera_delete (dp->camera);
 
-  if (dp->viewport)
-    viewport_delete (dp->viewport);
-
   if (dp->surface)
     vkDestroySurfaceKHR (gpu_device_get_instance (dp->gpu), dp->surface, NULL);
 
   dp->camera = NULL;
-  dp->viewport = NULL;
   dp->surface = VK_NULL_HANDLE;
 }
 

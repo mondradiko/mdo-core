@@ -72,10 +72,11 @@ create_render_pass (camera_t *cam)
 int
 camera_new (camera_t **new_cam, const struct camera_config *config)
 {
-  if (config->viewport_num > MAX_VIEWPORTS_PER_CAMERA) {
-    fprintf (stderr, "too many viewports\n");
-    return 1;
-  }
+  if (config->viewport_num > MAX_VIEWPORTS_PER_CAMERA)
+    {
+      fprintf (stderr, "too many viewports\n");
+      return 1;
+    }
 
   camera_t *cam = malloc (sizeof (camera_t));
   *new_cam = cam;
@@ -83,13 +84,21 @@ camera_new (camera_t **new_cam, const struct camera_config *config)
   cam->gpu = config->gpu;
   cam->vkd = gpu_device_get (cam->gpu);
   cam->rp = VK_NULL_HANDLE;
-
-  cam->viewport_num = config->viewport_num;
-  for (int i = 0; i < cam->viewport_num; i++)
-    cam->viewports[i] = config->viewports[i];
+  cam->viewport_num = 0;
 
   if (create_render_pass (cam))
     return 1;
+
+  for (int i = 0; i < config->viewport_num; i++)
+    {
+      cam->viewport_num++;
+      if (viewport_new (&cam->viewports[i], cam->rp,
+                        &config->viewport_configs[i]))
+        {
+          fprintf (stderr, "failed to create viewport\n");
+          return 1;
+        }
+    }
 
   return 0;
 }
@@ -97,6 +106,9 @@ camera_new (camera_t **new_cam, const struct camera_config *config)
 void
 camera_delete (camera_t *cam)
 {
+  for (int i = 0; i < cam->viewport_num; i++)
+    viewport_delete (cam->viewports[i]);
+
   if (cam->rp)
     vkDestroyRenderPass (cam->vkd, cam->rp, NULL);
 

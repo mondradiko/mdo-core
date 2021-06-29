@@ -17,6 +17,9 @@
 
 struct vp_image
 {
+  VkImage image;
+  VkImageView image_view;
+  VkFramebuffer framebuffer;
 };
 
 struct viewport_s
@@ -25,7 +28,11 @@ struct viewport_s
   VkDevice vkd;
   VkSwapchainKHR swapchain;
 
+  int width;
+  int height;
+
   struct vp_image images[MAX_IMAGE_NUM];
+  int image_num;
   int image_index;
 
   VkSemaphore on_image_acquire[MAX_FRAMES_IN_FLIGHT];
@@ -56,10 +63,14 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
       return 1;
     }
 
+  int image_count = caps.minImageCount;
+  if (image_count < 3)
+    image_count = 3;
+
   VkSwapchainCreateInfoKHR ci = {
     .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
     .surface = surface,
-    .minImageCount = caps.minImageCount,
+    .minImageCount = image_count,
 
     /* TODO(marceline-cramer): autoselect */
     .imageFormat = VK_FORMAT_B8G8R8A8_SRGB,
@@ -89,10 +100,77 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
       return 1;
     }
 
+  VkImage images[MAX_IMAGE_NUM];
+  uint32_t image_num = MAX_IMAGE_NUM;
+  if (vkGetSwapchainImagesKHR (vp->vkd, vp->swapchain, &image_num, images)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to get swapchain images\n");
+      return 1;
+    }
+
+  vp->image_num = image_num;
+  for (int i = 0; i < image_num; i++)
+    vp->images[i].image = images[i];
+
   return 0;
 }
 
-int
+static int
+create_images (viewport_t *vp, VkRenderPass rp)
+{
+  for (int i = 0; i < vp->image_num; i++)
+    {
+      VkImageViewCreateInfo view_ci = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = vp->images[i].image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        /* TODO(marceline-cramer): autoselect */
+        .format = VK_FORMAT_B8G8R8A8_SRGB,
+        .components = {
+          .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+          .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+          .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+          .a = VK_COMPONENT_SWIZZLE_IDENTITY,},
+        .subresourceRange = {
+          .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+          .baseMipLevel = 0,
+          .levelCount = 1,
+          .baseArrayLayer = 0,
+          .layerCount = 1,
+        },};
+
+      if (vkCreateImageView (vp->vkd, &view_ci, NULL,
+                             &vp->images[i].image_view)
+          != VK_SUCCESS)
+        {
+          fprintf (stderr, "failed to create image view\n");
+          return 1;
+        }
+
+      VkFramebufferCreateInfo fb_ci = {
+        .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+        .renderPass = rp,
+        .attachmentCount = 1,
+        .pAttachments = &vp->images[i].image_view,
+        .width = vp->width,
+        .height = vp->height,
+        .layers = 1,
+      };
+
+      if (vkCreateFramebuffer (vp->vkd, &fb_ci, NULL,
+                               &vp->images[i].framebuffer)
+          != VK_SUCCESS)
+        {
+          fprintf (stderr, "failed to create framebuffer\n");
+          return 1;
+        }
+    }
+
+  return 0;
+}
+
+static int
 create_semaphores (viewport_t *vp)
 {
   VkSemaphoreCreateInfo ci = {
@@ -113,7 +191,7 @@ create_semaphores (viewport_t *vp)
 }
 
 int
-viewport_new (viewport_t **new_vp, const struct viewport_config *config)
+viewport_new (viewport_t **new_vp, VkRenderPass rp, const struct viewport_config *config)
 {
   viewport_t *vp = malloc (sizeof (viewport_t));
   *new_vp = vp;
@@ -121,6 +199,10 @@ viewport_new (viewport_t **new_vp, const struct viewport_config *config)
   vp->gpu = config->gpu;
   vp->vkd = gpu_device_get (vp->gpu);
   vp->swapchain = VK_NULL_HANDLE;
+  vp->width = config->width;
+  vp->height = config->height;
+  vp->image_num = 0;
+  vp->image_acquire_index = -1;
 
   switch (config->type)
     {
@@ -137,6 +219,9 @@ viewport_new (viewport_t **new_vp, const struct viewport_config *config)
       }
     }
 
+  if (create_images (vp, rp))
+    return 1;
+
   if (create_semaphores (vp))
     return 1;
 
@@ -146,6 +231,12 @@ viewport_new (viewport_t **new_vp, const struct viewport_config *config)
 void
 viewport_delete (viewport_t *vp)
 {
+  for (int i = 0; i < vp->image_num; i++)
+    {
+      vkDestroyImageView (vp->vkd, vp->images[i].image_view, NULL);
+      vkDestroyFramebuffer (vp->vkd, vp->images[i].framebuffer, NULL);
+    }
+
   if (vp->swapchain)
     vkDestroySwapchainKHR (vp->vkd, vp->swapchain, NULL);
 
@@ -175,13 +266,16 @@ viewport_acquire (viewport_t *vp)
 VkSwapchainKHR
 viewport_get_swapchain (viewport_t *vp)
 {
-  return vp->swapchain;
+  if (vp->image_acquire_index < 0)
+    return NULL;
+  else
+    return vp->swapchain;
 }
 
 VkSemaphore
 viewport_get_on_acquire (viewport_t *vp)
 {
-  return vp->on_image_acquire [vp->image_acquire_index];
+  return vp->on_image_acquire[vp->image_acquire_index];
 }
 
 int
