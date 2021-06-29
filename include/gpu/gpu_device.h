@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <vulkan/vulkan_core.h> /* for handle types */
+
 /* forward declarations */
 struct vk_config_t;
 
@@ -17,3 +19,11 @@ int gpu_device_new (gpu_device_t **, const struct vk_config_t *);
 /** @function gpu_device_delete
  */
 void gpu_device_delete (gpu_device_t *);
+
+/** @function gpu_device_get_instance
+ */
+VkInstance gpu_device_get_instance (gpu_device_t *);
+
+/** @function gpu_device_get
+ */
+VkDevice gpu_device_get (gpu_device_t *);

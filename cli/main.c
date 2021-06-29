@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "displays/display.h"
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"

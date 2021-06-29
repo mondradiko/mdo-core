@@ -3,6 +3,7 @@
 
 #include "displays/sdl/sdl_display.h"
 
+#include "displays/display.h"
 #include "gpu/vk_config.h"
 
 /* TODO(marceline-cramer): replace with mdo_allocator */
