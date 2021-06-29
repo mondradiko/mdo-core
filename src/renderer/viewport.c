@@ -20,3 +20,9 @@ viewport_get_swapchain (viewport_t *vp)
 {
   return VK_NULL_HANDLE;
 }
+
+int
+viewport_get_image_index (viewport_t *vp)
+{
+  return 0;
+}

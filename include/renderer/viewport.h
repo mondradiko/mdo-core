@@ -42,3 +42,7 @@ void viewport_delete (viewport_t *);
 /** @function viewport_get_swapchain
  */
 VkSwapchainKHR viewport_get_swapchain (viewport_t *);
+
+/** @function viewport_get_image_index
+ */
+int viewport_get_image_index (viewport_t *);
