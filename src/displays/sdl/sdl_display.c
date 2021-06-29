@@ -7,6 +7,7 @@
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
 #include "renderer/camera.h"
+#include "renderer/viewport.h"
 
 /* TODO(marceline-cramer): replace with mdo_allocator */
 #include <stdio.h>  /* for fprintf */
@@ -25,6 +26,7 @@ struct sdl_display_s
   /* session data */
   gpu_device_t *gpu;
   VkSurfaceKHR surface;
+  viewport_t *viewport;
   camera_t *camera;
 };
 
@@ -84,6 +86,7 @@ sdl_display_new (sdl_display_t **new_dp)
   dp->instance_extensions = NULL;
   dp->surface = VK_NULL_HANDLE;
   dp->camera = NULL;
+  dp->viewport = NULL;
 
   if (create_window (dp))
     return -1;
@@ -97,6 +100,8 @@ sdl_display_new (sdl_display_t **new_dp)
 void
 sdl_display_delete (sdl_display_t *dp)
 {
+  sdl_display_end_session (dp);
+
   if (dp->window)
     SDL_DestroyWindow (dp->window);
 
@@ -131,6 +136,13 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
       return 1;
     }
 
+  struct viewport_config_t vp_config = {};
+  if (viewport_new (&dp->viewport, &vp_config))
+    {
+      fprintf (stderr, "failed to create viewport\n");
+      return 1;
+    }
+
   if (camera_new (&dp->camera))
     {
       fprintf (stderr, "failed to create camera\n");
@@ -145,6 +157,9 @@ sdl_display_end_session (sdl_display_t *dp)
 {
   if (dp->camera)
     camera_delete (dp->camera);
+
+  if (dp->viewport)
+    viewport_delete (dp->viewport);
 
   if (dp->surface)
     vkDestroySurfaceKHR (gpu_device_get_instance (dp->gpu), dp->surface, NULL);
