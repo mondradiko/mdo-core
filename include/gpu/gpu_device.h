@@ -27,3 +27,7 @@ VkInstance gpu_device_get_instance (gpu_device_t *);
 /** @function gpu_device_get
  */
 VkDevice gpu_device_get (gpu_device_t *);
+
+/** @function gpu_device_gfx_family
+ */
+int gpu_device_gfx_family (gpu_device_t *);

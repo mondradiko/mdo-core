@@ -272,3 +272,9 @@ gpu_device_get (gpu_device_t *gpu)
 
   return gpu->device;
 }
+
+int
+gpu_device_gfx_family (gpu_device_t *gpu)
+{
+  return gpu->gfx_queue_family;
+}
