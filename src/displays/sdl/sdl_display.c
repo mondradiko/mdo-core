@@ -157,7 +157,13 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
       return 1;
     }
 
-  if (camera_new (&dp->camera))
+  struct camera_config cam_config = {
+    .gpu = dp->gpu,
+    .viewports = &dp->viewport,
+    .viewport_num = 1,
+  };
+
+  if (camera_new (&dp->camera, &cam_config))
     {
       fprintf (stderr, "failed to create camera\n");
       return 1;
