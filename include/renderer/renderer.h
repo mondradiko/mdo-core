@@ -20,4 +20,4 @@ void renderer_delete (renderer_t *);
 
 /** @function renderer_render_frame
  */
-void renderer_render_frame (renderer_t *);
+void renderer_render_frame (renderer_t *, camera_t **, int);

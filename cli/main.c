@@ -81,7 +81,10 @@ main ()
       sdl_display_poll (cli.dp, &poll);
 
       if (poll.should_render)
-        renderer_render_frame (cli.ren);
+        {
+          camera_t *camera = sdl_display_camera (cli.dp);
+          renderer_render_frame (cli.ren, &camera, 1);
+        }
     }
 
   return 0;
