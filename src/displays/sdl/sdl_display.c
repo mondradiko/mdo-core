@@ -4,6 +4,7 @@
 #include "displays/sdl/sdl_display.h"
 
 #include "displays/display.h"
+#include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
 
 /* TODO(marceline-cramer): replace with mdo_allocator */
@@ -18,8 +19,11 @@
 struct sdl_display_s
 {
   SDL_Window *window;
-
   char *instance_extensions;
+
+  /* session data */
+  gpu_device_t *gpu;
+  VkSurfaceKHR surface;
 };
 
 static int
@@ -76,6 +80,7 @@ sdl_display_new (sdl_display_t **new_dp)
   *new_dp = dp;
 
   dp->instance_extensions = NULL;
+  dp->surface = VK_NULL_HANDLE;
 
   if (create_window (dp))
     return -1;
@@ -111,12 +116,28 @@ sdl_display_vk_config (sdl_display_t *dp, struct vk_config_t *config)
 int
 sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
 {
+  dp->gpu = gpu;
+
+  SDL_Window *window = dp->window;
+  VkInstance instance = gpu_device_get_instance (gpu);
+  VkSurfaceKHR *surface = &dp->surface;
+  if (SDL_Vulkan_CreateSurface (window, instance, surface) != SDL_TRUE)
+    {
+      fprintf (stderr, "failed to create window surface: %s\n",
+               SDL_GetError ());
+      return 1;
+    }
+
   return 0;
 }
 
 void
 sdl_display_end_session (sdl_display_t *dp)
 {
+  if (dp->surface)
+    vkDestroySurfaceKHR (gpu_device_get_instance (dp->gpu), dp->surface, NULL);
+
+  dp->surface = VK_NULL_HANDLE;
 }
 
 void
