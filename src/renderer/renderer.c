@@ -102,6 +102,9 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       viewport_num += acquired_num;
     }
 
+  for (int i = 0; i < viewport_num; i++)
+      viewport_acquire (viewports[i]);
+
   int swapchain_num = 0;
   VkSwapchainKHR swapchains[MAX_VIEWPORT_NUM];
 
@@ -115,7 +118,7 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       VkSwapchainKHR swapchain = viewport_get_swapchain (viewports[i]);
       if (swapchain != VK_NULL_HANDLE)
         {
-          VkSemaphore wait_semaphore = viewport_get_on_acquire(viewports[i]);
+          VkSemaphore wait_semaphore = viewport_get_on_acquire (viewports[i]);
           if (wait_semaphore != VK_NULL_HANDLE)
             wait_semaphores[wait_semaphore_num++] = wait_semaphore;
 
