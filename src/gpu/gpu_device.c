@@ -237,6 +237,9 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
   if (find_queue_families (gpu))
     return -1;
 
+  if (create_logical_device (gpu, config))
+    return -1;
+
   return 0;
 }
 
