@@ -26,6 +26,7 @@ struct viewport_s
 {
   gpu_device_t *gpu;
   VkDevice vkd;
+  VkRenderPass rp;
   VkSwapchainKHR swapchain;
 
   int width;
@@ -191,13 +192,15 @@ create_semaphores (viewport_t *vp)
 }
 
 int
-viewport_new (viewport_t **new_vp, VkRenderPass rp, const struct viewport_config *config)
+viewport_new (viewport_t **new_vp, VkRenderPass rp,
+              const struct viewport_config *config)
 {
   viewport_t *vp = malloc (sizeof (viewport_t));
   *new_vp = vp;
 
   vp->gpu = config->gpu;
   vp->vkd = gpu_device_get (vp->gpu);
+  vp->rp = rp;
   vp->swapchain = VK_NULL_HANDLE;
   vp->width = config->width;
   vp->height = config->height;
@@ -282,4 +285,30 @@ int
 viewport_get_image_index (viewport_t *vp)
 {
   return vp->image_index;
+}
+
+void
+viewport_begin_render_pass (viewport_t *vp, VkCommandBuffer cmd)
+{
+  VkClearValue clear_value = { .color = { 1.0, 0.0, 0.0, 1.0 } };
+
+  VkRenderPassBeginInfo begin_info = {
+    .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+    .renderPass = vp->rp,
+    .framebuffer = vp->images[vp->image_index].framebuffer,
+    .renderArea = {
+      .offset = {
+        .x = 0,
+        .y = 0,
+      },
+      .extent = {
+        .width = vp->width,
+        .height = vp->height,
+      },
+    },
+    .clearValueCount = 1,
+    .pClearValues = &clear_value,
+  };
+
+  vkCmdBeginRenderPass (cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }

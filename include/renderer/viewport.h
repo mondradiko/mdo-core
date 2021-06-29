@@ -58,3 +58,7 @@ VkSemaphore viewport_get_on_acquire (viewport_t *);
 /** @function viewport_get_image_index
  */
 int viewport_get_image_index (viewport_t *);
+
+/** @function viewport_begin_render_pass
+ */
+void viewport_begin_render_pass (viewport_t *, VkCommandBuffer);
