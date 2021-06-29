@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "gpu/gpu_device.h"
+
 #include <vulkan/vulkan_core.h> /* for VkSurfaceKHR, VkSwapchainKHR */
 
 /** @typedef viewport_t
@@ -21,6 +23,7 @@ struct viewport_surface_config
 
 struct viewport_config
 {
+  gpu_device_t *gpu;
   enum viewport_type type;
   int width;
   int height;
