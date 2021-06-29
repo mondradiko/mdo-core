@@ -42,9 +42,18 @@ int viewport_new (viewport_t **, const struct viewport_config *);
  */
 void viewport_delete (viewport_t *);
 
+/** @function viewport_acquire
+ * @param Non-zero if the swapchain has been acquired.
+ */
+int viewport_acquire (viewport_t *);
+
 /** @function viewport_get_swapchain
  */
 VkSwapchainKHR viewport_get_swapchain (viewport_t *);
+
+/** @function viewport_get_on_acquire
+ */
+VkSemaphore viewport_get_on_acquire (viewport_t *);
 
 /** @function viewport_get_image_index
  */

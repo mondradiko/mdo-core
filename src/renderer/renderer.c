@@ -104,12 +104,21 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 
   int swapchain_num = 0;
   VkSwapchainKHR swapchains[MAX_VIEWPORT_NUM];
+
+  int wait_semaphore_num = 0;
+  VkSemaphore wait_semaphores[MAX_VIEWPORT_NUM];
+
   uint32_t image_indices[MAX_VIEWPORT_NUM];
+
   for (int i = 0; i < viewport_num; i++)
     {
       VkSwapchainKHR swapchain = viewport_get_swapchain (viewports[i]);
       if (swapchain != VK_NULL_HANDLE)
         {
+          VkSemaphore wait_semaphore = viewport_get_on_acquire(viewports[i]);
+          if (wait_semaphore != VK_NULL_HANDLE)
+            wait_semaphores[wait_semaphore_num++] = wait_semaphore;
+
           image_indices[swapchain_num]
               = viewport_get_image_index (viewports[i]);
           swapchains[swapchain_num] = swapchain;
@@ -121,7 +130,8 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
     {
       VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .waitSemaphoreCount = 0,
+        .waitSemaphoreCount = wait_semaphore_num,
+        .pWaitSemaphores = wait_semaphores,
         .swapchainCount = swapchain_num,
         .pSwapchains = swapchains,
         .pImageIndices = image_indices,
