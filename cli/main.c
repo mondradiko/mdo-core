@@ -87,5 +87,6 @@ main ()
         }
     }
 
+  cleanup_cli_state (&cli);
   return 0;
 }
