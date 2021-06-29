@@ -4,11 +4,13 @@
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
+#include "renderer/renderer.h"
 
 typedef struct cli_state_s
 {
   sdl_display_t *dp;
   gpu_device_t *gpu;
+  renderer_t *ren;
 } cli_state_t;
 
 int
@@ -38,12 +40,21 @@ init_cli_state (cli_state_t *cli)
       return 1;
     }
 
+  if (renderer_new (&cli->ren, cli->gpu))
+    {
+      fprintf (stderr, "failed to create renderer\n");
+      return 1;
+    }
+
   return 0;
 }
 
 void
 cleanup_cli_state (cli_state_t *cli)
 {
+  if (cli->ren)
+    renderer_delete (cli->ren);
+
   if (cli->dp)
     {
       sdl_display_end_session (cli->dp);
@@ -68,6 +79,9 @@ main ()
   while (!poll.should_exit)
     {
       sdl_display_poll (cli.dp, &poll);
+
+      if (poll.should_render)
+        renderer_render_frame (cli.ren);
     }
 
   return 0;
