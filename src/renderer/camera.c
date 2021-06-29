@@ -13,3 +13,9 @@ void
 camera_delete (camera_t *cam)
 {
 }
+
+int
+camera_acquire (camera_t *cam, viewport_t **viewports)
+{
+  return 0;
+}
