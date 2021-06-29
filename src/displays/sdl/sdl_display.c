@@ -141,6 +141,7 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
   SDL_Vulkan_GetDrawableSize (dp->window, &width, &height);
 
   struct viewport_config vp_config = {
+    .gpu = dp->gpu,
     .type = VIEWPORT_TYPE_SURFACE,
     .width = width,
     .height = height,
@@ -177,6 +178,8 @@ sdl_display_end_session (sdl_display_t *dp)
   if (dp->surface)
     vkDestroySurfaceKHR (gpu_device_get_instance (dp->gpu), dp->surface, NULL);
 
+  dp->camera = NULL;
+  dp->viewport = NULL;
   dp->surface = VK_NULL_HANDLE;
 }
 
