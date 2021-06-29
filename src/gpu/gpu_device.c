@@ -189,12 +189,16 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
     .pQueuePriorities = &queue_priority,
   };
 
+  const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
+
   VkPhysicalDeviceFeatures device_features = {};
 
   VkDeviceCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     .queueCreateInfoCount = 1,
     .pQueueCreateInfos = &queue_ci,
+    .enabledLayerCount = 1,
+    .ppEnabledLayerNames = layers,
     .enabledExtensionCount = device_ext_num,
     .ppEnabledExtensionNames = device_exts,
     .pEnabledFeatures = &device_features,
