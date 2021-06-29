@@ -136,7 +136,20 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
       return 1;
     }
 
-  struct viewport_config_t vp_config = {};
+  int width;
+  int height;
+  SDL_Vulkan_GetDrawableSize (dp->window, &width, &height);
+
+  struct viewport_config vp_config = {
+    .type = VIEWPORT_TYPE_SURFACE,
+    .width = width,
+    .height = height,
+
+    .sub = {
+      .surface = dp->surface,
+    },
+  };
+
   if (viewport_new (&dp->viewport, &vp_config))
     {
       fprintf (stderr, "failed to create viewport\n");
@@ -188,4 +201,10 @@ sdl_display_poll (sdl_display_t *dp, struct display_poll_t *poll)
           break;
         }
     }
+}
+
+camera_t *
+sdl_display_camera (sdl_display_t *dp)
+{
+  return dp->camera;
 }

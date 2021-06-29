@@ -2,9 +2,10 @@
  */
 
 #include "renderer/viewport.h"
+#include <vulkan/vulkan_core.h>
 
 int
-viewport_new (viewport_t **new_vp, const struct viewport_config_t *config)
+viewport_new (viewport_t **new_vp, const struct viewport_config *config)
 {
   return 0;
 }
@@ -12,4 +13,10 @@ viewport_new (viewport_t **new_vp, const struct viewport_config_t *config)
 void
 viewport_delete (viewport_t *vp)
 {
+}
+
+VkSwapchainKHR
+viewport_get_swapchain (viewport_t *vp)
+{
+  return VK_NULL_HANDLE;
 }

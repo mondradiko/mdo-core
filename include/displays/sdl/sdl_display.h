@@ -4,6 +4,7 @@
 #pragma once
 
 #include "gpu/gpu_device.h"
+#include "renderer/camera.h"
 
 /* forward declarations */
 struct display_poll_t;
@@ -40,3 +41,7 @@ void sdl_display_end_session (sdl_display_t *);
  * @param poll
  */
 void sdl_display_poll (sdl_display_t *, struct display_poll_t *);
+
+/** @function sdl_display_camera
+ */
+camera_t *sdl_display_camera (sdl_display_t *);
