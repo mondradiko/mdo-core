@@ -32,6 +32,12 @@ init_cli_state (cli_state_t *cli)
       return 1;
     }
 
+  if (sdl_display_begin_session (cli->dp, cli->gpu))
+    {
+      fprintf (stderr, "failed to begin SDL session\n");
+      return 1;
+    }
+
   return 0;
 }
 
@@ -39,7 +45,10 @@ void
 cleanup_cli_state (cli_state_t *cli)
 {
   if (cli->dp)
-    sdl_display_delete (cli->dp);
+    {
+      sdl_display_end_session (cli->dp);
+      sdl_display_delete (cli->dp);
+    }
 
   if (cli->gpu)
     gpu_device_delete (cli->gpu);

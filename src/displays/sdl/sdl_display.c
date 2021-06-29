@@ -108,6 +108,17 @@ sdl_display_vk_config (sdl_display_t *dp, struct vk_config_t *config)
   config->physical_device = VK_NULL_HANDLE;
 }
 
+int
+sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
+{
+  return 0;
+}
+
+void
+sdl_display_end_session (sdl_display_t *dp)
+{
+}
+
 void
 sdl_display_poll (sdl_display_t *dp, struct display_poll_t *poll)
 {
