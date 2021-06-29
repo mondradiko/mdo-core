@@ -6,6 +6,7 @@
 #include "displays/display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
+#include "renderer/camera.h"
 
 /* TODO(marceline-cramer): replace with mdo_allocator */
 #include <stdio.h>  /* for fprintf */
@@ -24,6 +25,7 @@ struct sdl_display_s
   /* session data */
   gpu_device_t *gpu;
   VkSurfaceKHR surface;
+  camera_t *camera;
 };
 
 static int
@@ -81,6 +83,7 @@ sdl_display_new (sdl_display_t **new_dp)
 
   dp->instance_extensions = NULL;
   dp->surface = VK_NULL_HANDLE;
+  dp->camera = NULL;
 
   if (create_window (dp))
     return -1;
@@ -128,12 +131,21 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
       return 1;
     }
 
+  if (camera_new (&dp->camera))
+    {
+      fprintf (stderr, "failed to create camera\n");
+      return 1;
+    }
+
   return 0;
 }
 
 void
 sdl_display_end_session (sdl_display_t *dp)
 {
+  if (dp->camera)
+    camera_delete (dp->camera);
+
   if (dp->surface)
     vkDestroySurfaceKHR (gpu_device_get_instance (dp->gpu), dp->surface, NULL);
 
