@@ -16,6 +16,7 @@ set(MDO_CORE_SRC
   src/displays/sdl/sdl_display.c
   src/gpu/gpu_device.c
   src/renderer/camera.c
+  src/renderer/viewport.c
 )
 
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
