@@ -18,6 +18,8 @@
 struct frame_data
 {
   VkCommandPool command_pool;
+  VkSemaphore on_finished;
+  VkFence is_in_flight;
 };
 
 struct renderer_s
@@ -25,14 +27,18 @@ struct renderer_s
   gpu_device_t *gpu;
   VkDevice vkd;
   VkQueue present_queue;
+
   struct frame_data frames[MAX_FRAMES_IN_FLIGHT];
   int frame_num;
+  int frame_index;
 };
 
 static int
 frame_data_init (renderer_t *ren, struct frame_data *frame)
 {
   frame->command_pool = VK_NULL_HANDLE;
+  frame->on_finished = VK_NULL_HANDLE;
+  frame->is_in_flight = VK_NULL_HANDLE;
 
   VkCommandPoolCreateInfo cp_ci = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -46,6 +52,29 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
       return 1;
     }
 
+  VkSemaphoreCreateInfo semaphore_ci = {
+    .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+  };
+
+  if (vkCreateSemaphore (ren->vkd, &semaphore_ci, NULL, &frame->on_finished)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to create semaphore\n");
+      return 1;
+    }
+
+  VkFenceCreateInfo fence_ci = {
+    .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+    .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+  };
+
+  if (vkCreateFence (ren->vkd, &fence_ci, NULL, &frame->is_in_flight)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to create fence\n");
+      return 1;
+    }
+
   return 0;
 }
 
@@ -54,6 +83,12 @@ frame_data_cleanup (renderer_t *ren, struct frame_data *frame)
 {
   if (frame->command_pool)
     vkDestroyCommandPool (ren->vkd, frame->command_pool, NULL);
+
+  if (frame->on_finished)
+    vkDestroySemaphore (ren->vkd, frame->on_finished, NULL);
+
+  if (frame->is_in_flight)
+    vkDestroyFence (ren->vkd, frame->is_in_flight, NULL);
 }
 
 int
@@ -64,6 +99,7 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu)
 
   ren->gpu = gpu;
   ren->vkd = gpu_device_get (gpu);
+  ren->frame_index = 0;
 
   int gfx_family = gpu_device_gfx_family (gpu);
   int queue_index = 0;
@@ -79,6 +115,8 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu)
 void
 renderer_delete (renderer_t *ren)
 {
+  vkQueueWaitIdle (ren->present_queue);
+
   for (int i = 0; i < ren->frame_num; i++)
     frame_data_cleanup (ren, &ren->frames[i]);
 
@@ -94,6 +132,16 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       return;
     }
 
+  ren->frame_index++;
+  if (ren->frame_index >= ren->frame_num)
+    ren->frame_index = 0;
+
+  struct frame_data *frame = &ren->frames[ren->frame_index];
+
+  vkWaitForFences (ren->vkd, 1, &frame->is_in_flight, VK_TRUE, UINT64_MAX);
+  vkResetFences (ren->vkd, 1, &frame->is_in_flight);
+  vkResetCommandPool (ren->vkd, frame->command_pool, 0);
+
   int viewport_num = 0;
   viewport_t *viewports[MAX_VIEWPORT_NUM];
   for (int i = 0; i < camera_num; i++)
@@ -103,13 +151,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
     }
 
   for (int i = 0; i < viewport_num; i++)
-      viewport_acquire (viewports[i]);
+    viewport_acquire (viewports[i]);
 
   int swapchain_num = 0;
   VkSwapchainKHR swapchains[MAX_VIEWPORT_NUM];
 
   int wait_semaphore_num = 0;
   VkSemaphore wait_semaphores[MAX_VIEWPORT_NUM];
+  VkPipelineStageFlags wait_stage_flags[MAX_VIEWPORT_NUM];
 
   uint32_t image_indices[MAX_VIEWPORT_NUM];
 
@@ -120,7 +169,12 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
         {
           VkSemaphore wait_semaphore = viewport_get_on_acquire (viewports[i]);
           if (wait_semaphore != VK_NULL_HANDLE)
-            wait_semaphores[wait_semaphore_num++] = wait_semaphore;
+            {
+              wait_stage_flags[wait_semaphore_num]
+                  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+              wait_semaphores[wait_semaphore_num] = wait_semaphore;
+              wait_semaphore_num++;
+            }
 
           image_indices[swapchain_num]
               = viewport_get_image_index (viewports[i]);
@@ -129,12 +183,51 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
         }
     }
 
+  VkCommandBuffer cmd;
+
+  VkCommandBufferAllocateInfo alloc_info = {
+    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+    .commandPool = frame->command_pool,
+    .commandBufferCount = 1,
+    .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+  };
+
+  vkAllocateCommandBuffers (ren->vkd, &alloc_info, &cmd);
+
+  VkCommandBufferBeginInfo begin_info = {
+    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+    .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+  };
+
+  vkBeginCommandBuffer (cmd, &begin_info);
+
+  for (int i = 0; i < viewport_num; i++)
+    {
+      viewport_begin_render_pass (viewports[i], cmd);
+      vkCmdEndRenderPass (cmd);
+    }
+
+  vkEndCommandBuffer (cmd);
+
+  VkSubmitInfo submit_info = {
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    .waitSemaphoreCount = wait_semaphore_num,
+    .pWaitSemaphores = wait_semaphores,
+    .pWaitDstStageMask = wait_stage_flags,
+    .commandBufferCount = 1,
+    .pCommandBuffers = &cmd,
+    .signalSemaphoreCount = 1,
+    .pSignalSemaphores = &frame->on_finished,
+  };
+
+  vkQueueSubmit (ren->present_queue, 1, &submit_info, frame->is_in_flight);
+
   if (swapchain_num > 0)
     {
       VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        .waitSemaphoreCount = wait_semaphore_num,
-        .pWaitSemaphores = wait_semaphores,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &frame->on_finished,
         .swapchainCount = swapchain_num,
         .pSwapchains = swapchains,
         .pImageIndices = image_indices,
