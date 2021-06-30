@@ -10,6 +10,41 @@ include(FindVulkan)
 if(NOT Vulkan_FOUND)
   message(FATAL_ERROR "Vulkan not found.")
 endif()
+if(NOT Vulkan_GLSLC_EXECUTABLE)
+  message(FATAL_ERROR "glslc not found.")
+endif()
+
+# shaders
+function(spirv_shader ret GLSL VAR)
+  set(SPIRV "${CMAKE_CURRENT_BINARY_DIR}/${GLSL}.spv")
+  set(GLSL "${CMAKE_CURRENT_SOURCE_DIR}/${GLSL}")
+
+  add_custom_command(
+    OUTPUT ${SPIRV}
+    COMMAND Vulkan::glslc -O -o ${SPIRV} ${GLSL}
+    DEPENDS ${GLSL}
+  )
+
+  set(${ret} "${SPIRV}" PARENT_SCOPE)
+endfunction(spirv_shader)
+
+function(spirv_shaders ret)
+  foreach(GLSL ${ARGN})
+    string(MAKE_C_IDENTIFIER ${GLSL} IDENTIFIER)
+    spirv_shader(HEADER ${GLSL} ${IDENTIFIER})
+    list(APPEND HEADERS ${HEADER})
+  endforeach()
+
+  set(${ret} "${HEADERS}" PARENT_SCOPE)
+endfunction(spirv_shaders)
+
+set(SHADERS_SRC
+  shaders/debug.frag
+  shaders/debug.vert
+)
+
+spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
+add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
 
 # main library
 set(MDO_CORE_SRC
