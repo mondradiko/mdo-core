@@ -89,7 +89,7 @@ frame_data_cleanup (renderer_t *ren, struct frame_data *frame)
 }
 
 int
-renderer_new (renderer_t **new_ren, gpu_device_t *gpu)
+renderer_new (renderer_t **new_ren, gpu_device_t *gpu, VkRenderPass rp)
 {
   renderer_t *ren = malloc (sizeof (renderer_t));
   *new_ren = ren;
@@ -103,7 +103,7 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu)
   int queue_index = 0;
   vkGetDeviceQueue (ren->vkd, gfx_family, queue_index, &ren->present_queue);
 
-  if (debug_pass_new (&ren->debug_pass, ren))
+  if (debug_pass_new (&ren->debug_pass, ren, rp))
     {
       fprintf (stderr, "failed to create debug pass\n");
       return 1;

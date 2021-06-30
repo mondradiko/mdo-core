@@ -40,7 +40,8 @@ init_cli_state (cli_state_t *cli)
       return 1;
     }
 
-  if (renderer_new (&cli->ren, cli->gpu))
+  VkRenderPass rp = camera_get_render_pass (sdl_display_get_camera (cli->dp));
+  if (renderer_new (&cli->ren, cli->gpu, rp))
     {
       fprintf (stderr, "failed to create renderer\n");
       return 1;

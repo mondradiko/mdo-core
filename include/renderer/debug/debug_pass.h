@@ -12,7 +12,7 @@ typedef struct debug_pass_s debug_pass_t;
 
 /** @function debug_pass_new
  */
-int debug_pass_new (debug_pass_t **, renderer_t *);
+int debug_pass_new (debug_pass_t **, renderer_t *, VkRenderPass);
 
 /** @function debug_pass_delete
  */
