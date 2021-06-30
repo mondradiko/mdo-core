@@ -18,6 +18,10 @@ int renderer_new (renderer_t **, gpu_device_t *);
  */
 void renderer_delete (renderer_t *);
 
+/** @function renderer_get_gpu
+ */
+gpu_device_t *renderer_get_gpu (renderer_t *);
+
 /** @function renderer_render_frame
  */
 void renderer_render_frame (renderer_t *, camera_t **, int);

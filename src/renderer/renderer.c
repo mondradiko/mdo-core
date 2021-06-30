@@ -147,6 +147,12 @@ renderer_delete (renderer_t *ren)
   free (ren);
 }
 
+gpu_device_t *
+renderer_get_gpu (renderer_t *ren)
+{
+  return ren->gpu;
+}
+
 void
 renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 {
