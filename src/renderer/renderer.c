@@ -10,6 +10,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "gpu/gpu_device.h"
+#include "renderer/debug/debug_pass.h"
 #include "renderer/frame_data.h"
 #include "renderer/render_phases.h"
 
@@ -21,6 +22,8 @@ struct renderer_s
   gpu_device_t *gpu;
   VkDevice vkd;
   VkQueue present_queue;
+
+  debug_pass_t *debug_pass;
 
   struct frame_data frames[MAX_FRAMES_IN_FLIGHT];
   int frame_num;
@@ -93,15 +96,36 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu)
 
   ren->gpu = gpu;
   ren->vkd = gpu_device_get (gpu);
+  ren->debug_pass = NULL;
   ren->frame_index = 0;
 
   int gfx_family = gpu_device_gfx_family (gpu);
   int queue_index = 0;
   vkGetDeviceQueue (ren->vkd, gfx_family, queue_index, &ren->present_queue);
 
-  ren->frame_num = 2;
-  for (int i = 0; i < ren->frame_num; i++)
-    frame_data_init (ren, &ren->frames[i]);
+  if (debug_pass_new (&ren->debug_pass, ren))
+    {
+      fprintf (stderr, "failed to create debug pass\n");
+      return 1;
+    }
+
+  for (int i = 0; i < 2; i++)
+    {
+      ren->frame_num++;
+      struct frame_data *frame = &ren->frames[i];
+
+      if (frame_data_init (ren, frame))
+        {
+          fprintf (stderr, "failed to create frame data\n");
+          return 1;
+        }
+
+      if (debug_frame_data_init (ren->debug_pass, &frame->debug))
+        {
+          fprintf (stderr, "failed to create debug frame data\n");
+          return 1;
+        }
+    }
 
   return 0;
 }
@@ -112,7 +136,13 @@ renderer_delete (renderer_t *ren)
   vkQueueWaitIdle (ren->present_queue);
 
   for (int i = 0; i < ren->frame_num; i++)
-    frame_data_cleanup (ren, &ren->frames[i]);
+    {
+      struct frame_data *frame = &ren->frames[i];
+      debug_frame_data_cleanup (ren->debug_pass, &frame->debug);
+      frame_data_cleanup (ren, frame);
+    }
+
+  debug_pass_delete (ren->debug_pass);
 
   free (ren);
 }
