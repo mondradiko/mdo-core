@@ -10,17 +10,11 @@
 #include <vulkan/vulkan_core.h>
 
 #include "gpu/gpu_device.h"
+#include "renderer/frame_data.h"
 #include "renderer/render_phases.h"
 
 #define MAX_CAMERA_NUM 1024
 #define MAX_VIEWPORT_NUM (MAX_CAMERA_NUM * MAX_VIEWPORTS_PER_CAMERA)
-
-struct frame_data
-{
-  VkCommandPool command_pool;
-  VkSemaphore on_finished;
-  VkFence is_in_flight;
-};
 
 struct renderer_s
 {
