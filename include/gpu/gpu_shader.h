@@ -11,7 +11,7 @@ typedef struct gpu_shader_s gpu_shader_t;
 
 /** @function gpu_shader_new
  */
-int gpu_shader_new (gpu_shader_t **, gpu_device_t *);
+int gpu_shader_new (gpu_shader_t **, gpu_device_t *, VkShaderStageFlags);
 
 /** @function gpu_shader_delete
  */
