@@ -115,6 +115,12 @@ camera_delete (camera_t *cam)
   free (cam);
 }
 
+VkRenderPass
+camera_get_render_pass (camera_t *cam)
+{
+  return cam->rp;
+}
+
 int
 camera_acquire (camera_t *cam, viewport_t **viewports)
 {

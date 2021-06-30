@@ -27,6 +27,10 @@ int camera_new (camera_t **, const struct camera_config *);
  */
 void camera_delete (camera_t *);
 
+/** @function camera_get_render_pass
+ */
+VkRenderPass camera_get_render_pass (camera_t *);
+
 /** @function camera_acquire
  * @return the number of viewports acquired.
  */
