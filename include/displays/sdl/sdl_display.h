@@ -28,6 +28,10 @@ void sdl_display_delete (sdl_display_t *);
  */
 void sdl_display_vk_config (sdl_display_t *, struct vk_config_t *);
 
+/** @function sdl_display_get_camera
+ */
+camera_t *sdl_display_get_camera (sdl_display_t *);
+
 /** @function sdl_display_begin_session
  */
 int sdl_display_begin_session (sdl_display_t *, gpu_device_t *);

@@ -177,6 +177,12 @@ sdl_display_end_session (sdl_display_t *dp)
   dp->surface = VK_NULL_HANDLE;
 }
 
+camera_t *
+sdl_display_get_camera (sdl_display_t *dp)
+{
+  return dp->camera;
+}
+
 void
 sdl_display_poll (sdl_display_t *dp, struct display_poll_t *poll)
 {
