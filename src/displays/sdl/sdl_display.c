@@ -79,6 +79,12 @@ get_instance_extensions (sdl_display_t *dp)
 int
 sdl_display_new (sdl_display_t **new_dp)
 {
+  if (SDL_Init (SDL_INIT_VIDEO))
+    {
+      fprintf (stderr, "failed to init SDL\n");
+      return -1;
+    }
+
   sdl_display_t *dp = malloc (sizeof (sdl_display_t));
   *new_dp = dp;
 
@@ -107,6 +113,8 @@ sdl_display_delete (sdl_display_t *dp)
     free (dp->instance_extensions);
 
   free (dp);
+
+  SDL_Quit ();
 }
 
 void
