@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(mdo-core VERSION 0.0.0)
 
+# options
+option(TRACY_ENABLE "Enable Tracy profiling.")
+
 include_directories(include)
 
 # dependencies
@@ -57,6 +60,12 @@ set(MDO_CORE_SRC
   src/renderer/renderer.c
   src/renderer/viewport.c
 )
+
+if(TRACY_ENABLE)
+  list(APPEND MDO_CORE_SRC lib/Tracy/TracyClient.cpp)
+  include_directories(lib/Tracy/)
+  add_compile_definitions(TRACY_ENABLE)
+endif()
 
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
