@@ -311,4 +311,25 @@ viewport_begin_render_pass (viewport_t *vp, VkCommandBuffer cmd)
   };
 
   vkCmdBeginRenderPass (cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+  VkViewport viewport = {
+    .x = 0,
+    .y = 0,
+    .width = vp->width,
+    .height = vp->height,
+  };
+
+  VkRect2D scissor = {
+    .offset = {
+      .x = 0,
+      .y = 0,
+    },
+    .extent = {
+      .width = vp->width,
+      .height = vp->height
+    },
+  };
+
+  vkCmdSetViewport (cmd, 0, 1, &viewport);
+  vkCmdSetScissor (cmd, 0, 1, &scissor);
 }
