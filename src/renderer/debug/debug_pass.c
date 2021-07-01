@@ -224,3 +224,10 @@ void
 debug_frame_data_cleanup (debug_pass_t *dbp, struct debug_frame_data *frame)
 {
 }
+
+void
+debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx)
+{
+  vkCmdBindPipeline (ctx->cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dbp->pipeline);
+  vkCmdDraw (ctx->cmd, 3, 1, 0, 0);
+}
