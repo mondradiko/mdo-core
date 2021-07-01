@@ -2,8 +2,10 @@
  */
 
 #include "renderer/debug/debug_pass.h"
+
 #include "gpu/gpu_device.h"
 #include "gpu/gpu_shader.h"
+#include "renderer/debug/debug_draw.h"
 
 /* TODO(marceline-cramer): custom logging */
 #include <stdio.h> /* for fprintf */
@@ -23,14 +25,6 @@ struct debug_pass_s
   VkPipelineLayout pipeline_layout;
   VkPipeline pipeline;
 };
-
-typedef struct debug_vertex_s
-{
-  float position[3];
-  float color[3];
-} debug_vertex_t;
-
-typedef uint32_t debug_index_t;
 
 static int
 create_pipeline_layout (debug_pass_t *dbp)
@@ -89,7 +83,7 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
 
   VkVertexInputBindingDescription binding_desc = {
     .binding = 0,
-    .stride = sizeof (debug_vertex_t),
+    .stride = sizeof (debug_draw_vertex_t),
     .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
   };
 
@@ -99,14 +93,14 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
     .binding = 0,
     .location = 0,
     .format = VK_FORMAT_R32G32B32_SFLOAT,
-    .offset = offsetof (debug_vertex_t, position),
+    .offset = offsetof (debug_draw_vertex_t, position),
   };
 
   attribute_descs[1] = (VkVertexInputAttributeDescription){
     .binding = 0,
     .location = 1,
     .format = VK_FORMAT_R32G32B32_SFLOAT,
-    .offset = offsetof (debug_vertex_t, color),
+    .offset = offsetof (debug_draw_vertex_t, color),
   };
 
   VkPipelineVertexInputStateCreateInfo vertex_input_state = {
@@ -285,17 +279,17 @@ debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
                    struct debug_frame_data *frame)
 {
   frame->vertex_num = 3;
-  const debug_vertex_t vertices[] = {
+  const debug_draw_vertex_t vertices[] = {
     { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } },
     { { 1.0, 1.0, 0.0 }, { 0.0, 1.0, 1.0 } },
     { { -1.0, 1.0, 0.0 }, { 1.0, 0.0, 1.0 } },
   };
 
   frame->index_num = 3;
-  const debug_index_t indices[] = { 0, 1, 2 };
+  const debug_draw_index_t indices[] = { 0, 1, 2 };
 
-  gpu_vector_write (frame->vertices, vertices, sizeof (debug_vertex_t), 3);
-  gpu_vector_write (frame->indices, indices, sizeof (debug_index_t), 3);
+  gpu_vector_write (frame->vertices, vertices, sizeof (debug_draw_vertex_t), 3);
+  gpu_vector_write (frame->indices, indices, sizeof (debug_draw_index_t), 3);
 
   VkBuffer vertex_buffer = gpu_vector_get (frame->vertices);
   VkBuffer index_buffer = gpu_vector_get (frame->indices);
