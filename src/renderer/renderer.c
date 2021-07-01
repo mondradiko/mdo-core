@@ -245,7 +245,7 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
         .camera = viewport_cameras[i],
       };
 
-      debug_pass_render (ren->debug_pass, &ctx);
+      debug_pass_render (ren->debug_pass, &ctx, &frame->debug);
 
       vkCmdEndRenderPass (cmd);
     }

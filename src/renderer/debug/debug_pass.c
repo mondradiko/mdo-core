@@ -24,6 +24,14 @@ struct debug_pass_s
   VkPipeline pipeline;
 };
 
+typedef struct debug_vertex_s
+{
+  float position[3];
+  float color[3];
+} debug_vertex_t;
+
+typedef uint32_t debug_index_t;
+
 static int
 create_pipeline_layout (debug_pass_t *dbp)
 {
@@ -79,10 +87,34 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
   gpu_shader_get (dbp->vertex_shader, &shader_stages[0]);
   gpu_shader_get (dbp->fragment_shader, &shader_stages[1]);
 
+  VkVertexInputBindingDescription binding_desc = {
+    .binding = 0,
+    .stride = sizeof (debug_vertex_t),
+    .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+  };
+
+  VkVertexInputAttributeDescription attribute_descs[2];
+
+  attribute_descs[0] = (VkVertexInputAttributeDescription){
+    .binding = 0,
+    .location = 0,
+    .format = VK_FORMAT_R32G32B32_SFLOAT,
+    .offset = offsetof (debug_vertex_t, position),
+  };
+
+  attribute_descs[1] = (VkVertexInputAttributeDescription){
+    .binding = 0,
+    .location = 1,
+    .format = VK_FORMAT_R32G32B32_SFLOAT,
+    .offset = offsetof (debug_vertex_t, color),
+  };
+
   VkPipelineVertexInputStateCreateInfo vertex_input_state = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-    .vertexBindingDescriptionCount = 0,
-    .vertexAttributeDescriptionCount = 0,
+    .vertexBindingDescriptionCount = 1,
+    .pVertexBindingDescriptions = &binding_desc,
+    .vertexAttributeDescriptionCount = 2,
+    .pVertexAttributeDescriptions = attribute_descs,
   };
 
   VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {
@@ -217,17 +249,62 @@ debug_pass_delete (debug_pass_t *dbp)
 int
 debug_frame_data_init (debug_pass_t *dbp, struct debug_frame_data *frame)
 {
+  frame->vertices = NULL;
+  frame->indices = NULL;
+
+  const VkBufferUsageFlags VERTEX_USAGE = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  const VkBufferUsageFlags INDEX_USAGE = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+  if (gpu_vector_new (&frame->vertices, dbp->gpu, VERTEX_USAGE))
+    {
+      fprintf (stderr, "failed to create vertex buffer\n");
+      return 1;
+    }
+
+  if (gpu_vector_new (&frame->indices, dbp->gpu, INDEX_USAGE))
+    {
+      fprintf (stderr, "failed to create index buffer\n");
+      return 1;
+    }
+
   return 0;
 }
 
 void
 debug_frame_data_cleanup (debug_pass_t *dbp, struct debug_frame_data *frame)
 {
+  if (frame->vertices)
+    gpu_vector_delete (frame->vertices);
+
+  if (frame->indices)
+    gpu_vector_delete (frame->indices);
 }
 
 void
-debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx)
+debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
+                   struct debug_frame_data *frame)
 {
+  frame->vertex_num = 3;
+  const debug_vertex_t vertices[] = {
+    { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } },
+    { { 1.0, 1.0, 0.0 }, { 0.0, 1.0, 1.0 } },
+    { { -1.0, 1.0, 0.0 }, { 1.0, 0.0, 1.0 } },
+  };
+
+  frame->index_num = 3;
+  const debug_index_t indices[] = { 0, 1, 2 };
+
+  gpu_vector_write (frame->vertices, vertices, sizeof (debug_vertex_t), 3);
+  gpu_vector_write (frame->indices, indices, sizeof (debug_index_t), 3);
+
+  VkBuffer vertex_buffer = gpu_vector_get (frame->vertices);
+  VkBuffer index_buffer = gpu_vector_get (frame->indices);
+
   vkCmdBindPipeline (ctx->cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dbp->pipeline);
-  vkCmdDraw (ctx->cmd, 3, 1, 0, 0);
+
+  size_t offsets[] = { 0 };
+  vkCmdBindVertexBuffers (ctx->cmd, 0, 1, &vertex_buffer, offsets);
+  vkCmdBindIndexBuffer (ctx->cmd, index_buffer, 0, VK_INDEX_TYPE_UINT32);
+
+  vkCmdDrawIndexed (ctx->cmd, frame->index_num, 1, 0, 0, 0);
 }

@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "renderer/renderer.h"
-#include "renderer/render_phases.h"
 #include "renderer/debug/debug_frame_data.h"
+#include "renderer/render_phases.h"
+#include "renderer/renderer.h"
 
 /** @typedef debug_pass_t
  */
@@ -29,4 +29,5 @@ void debug_frame_data_cleanup (debug_pass_t *, struct debug_frame_data *);
 
 /** @function debug_pass_render
  */
-void debug_pass_render (debug_pass_t *, const struct render_context *);
+void debug_pass_render (debug_pass_t *, const struct render_context *,
+                        struct debug_frame_data *);
