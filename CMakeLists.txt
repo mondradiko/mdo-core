@@ -51,6 +51,7 @@ set(MDO_CORE_SRC
   src/displays/sdl/sdl_display.c
   src/gpu/gpu_device.c
   src/gpu/gpu_shader.c
+  src/gpu/gpu_vector.c
   src/renderer/debug/debug_pass.c
   src/renderer/camera.c
   src/renderer/renderer.c
