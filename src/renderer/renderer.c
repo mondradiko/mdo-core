@@ -174,9 +174,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 
   int viewport_num = 0;
   viewport_t *viewports[MAX_VIEWPORT_NUM];
+  camera_t *viewport_cameras[MAX_VIEWPORT_NUM];
   for (int i = 0; i < camera_num; i++)
     {
       int acquired_num = camera_acquire (cameras[i], &viewports[viewport_num]);
+
+      for (int j = 0; j < acquired_num; j++)
+        viewport_cameras[j + viewport_num] = cameras[j];
+
       viewport_num += acquired_num;
     }
 
@@ -234,6 +239,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
   for (int i = 0; i < viewport_num; i++)
     {
       viewport_begin_render_pass (viewports[i], cmd);
+
+      const struct render_context ctx = {
+        .cmd = cmd,
+        .camera = viewport_cameras[i],
+      };
+
+      debug_pass_render (ren->debug_pass, &ctx);
+
       vkCmdEndRenderPass (cmd);
     }
 
