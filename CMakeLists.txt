@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+include(cmake/prelude.cmake)
 project(mdo-core VERSION 0.0.0)
 
 # options
@@ -7,15 +8,27 @@ option(TRACY_ENABLE "Enable Tracy profiling.")
 include_directories(include)
 
 # dependencies
-find_package(SDL2 REQUIRED)
+#include(FindVulkan)
+#if(NOT Vulkan_FOUND)
+# message(FATAL_ERROR "Vulkan not found.")
+#endif()
+#if(NOT Vulkan_GLSLC_EXECUTABLE)
+#  message(FATAL_ERROR "glslc not found.")
+#endif()
 
-include(FindVulkan)
-if(NOT Vulkan_FOUND)
-  message(FATAL_ERROR "Vulkan not found.")
-endif()
-if(NOT Vulkan_GLSLC_EXECUTABLE)
-  message(FATAL_ERROR "glslc not found.")
-endif()
+find_mondradiko_dependency(
+  mondradiko::vulkan "Vulkan" NOCONFIG
+  INSTALL "vulkan-sdk"
+  Vulkan::Vulkan
+)
+
+find_mondradiko_dependency(
+  mondradiko::sdl2 "SDL2" SDL2::SDL2main
+  INSTALL "sdl2[vulkan]"
+  # UNIX SDL2::SDL2-static
+  UNIX SDL2::SDL2
+  WIN32 SDL2::SDL2
+)
 
 # shaders
 function(spirv_shader ret GLSL VAR)
@@ -70,8 +83,8 @@ endif()
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
-  SDL2::SDL2
-  Vulkan::Vulkan
+  mondradiko::sdl2
+  mondradiko::vulkan
 )
 
 add_executable(mdo-cli cli/main.c)
