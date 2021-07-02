@@ -186,6 +186,9 @@ gpu_vector_write (gpu_vector_t *vec, const void *src, size_t size, size_t num)
 {
   size_t copy_size = size * num;
 
+  if (copy_size == 0)
+    return 0;
+
   if (gpu_vector_reserve (vec, copy_size))
     {
       fprintf (stderr, "failed to reserve GPU memory for transfer\n");
