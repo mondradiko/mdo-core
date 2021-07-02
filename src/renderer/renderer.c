@@ -155,8 +155,6 @@ renderer_get_gpu (renderer_t *ren)
   return ren->gpu;
 }
 
-static const char *RENDER_FRAME_NAME = "render";
-
 void
 renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 {
@@ -175,8 +173,6 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
   vkWaitForFences (ren->vkd, 1, &frame->is_in_flight, VK_TRUE, UINT64_MAX);
   vkResetFences (ren->vkd, 1, &frame->is_in_flight);
   vkResetCommandPool (ren->vkd, frame->command_pool, 0);
-
-  TracyCFrameMarkStart(RENDER_FRAME_NAME);
 
   int viewport_num = 0;
   viewport_t *viewports[MAX_VIEWPORT_NUM];
@@ -288,5 +284,5 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
         }
     }
 
-  TracyCFrameMarkEnd (RENDER_FRAME_NAME);
+  TracyCFrameMarkNamed ("render");
 }
