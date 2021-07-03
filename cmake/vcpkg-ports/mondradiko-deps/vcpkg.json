@@ -5,6 +5,7 @@
   "description": "portfile for managing Mondradiko VCPKG dependencies as a set",
   "homepage": "https://github.com/mondradiko/mondradiko",
   "dependencies": [
+    "vulkan-sdk",
     {
       "name": "sdl2",
       "features": [ "vulkan" ]
