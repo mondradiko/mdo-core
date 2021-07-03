@@ -15,6 +15,8 @@
 #include <vulkan/vulkan_core.h>
 
 #define MAX_EXTENSIONS 32
+#define MAX_PHYSICAL_DEVICES 32
+#define MAX_QUEUE_FAMILIES 32
 
 struct gpu_device_s
 {
@@ -138,8 +140,8 @@ create_instance (gpu_device_t *gpu, const struct vk_config_t *config)
 static VkPhysicalDevice
 autoselect_physical_device (gpu_device_t *gpu)
 {
-  uint32_t device_count = 32; /* the user will never have more than 32 GPUs */
-  VkPhysicalDevice devices[device_count];
+  uint32_t device_count = MAX_PHYSICAL_DEVICES;
+  VkPhysicalDevice devices[MAX_PHYSICAL_DEVICES];
 
   /* TODO(marceline-cramer) check this result in the case that the user DOES
    * have way too many GPUs */
@@ -155,8 +157,8 @@ autoselect_physical_device (gpu_device_t *gpu)
 static int
 find_queue_families (gpu_device_t *gpu)
 {
-  uint32_t num = 32; /* ultra-conservative upper cap */
-  VkQueueFamilyProperties props[num];
+  uint32_t num = MAX_PHYSICAL_DEVICES;
+  VkQueueFamilyProperties props[MAX_PHYSICAL_DEVICES];
   vkGetPhysicalDeviceQueueFamilyProperties (gpu->physical_device, &num, props);
 
   for (int i = 0; i < num; i++)
