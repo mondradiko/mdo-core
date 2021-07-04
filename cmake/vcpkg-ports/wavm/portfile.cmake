@@ -10,7 +10,6 @@ vcpkg_configure_cmake(
 	SOURCE_PATH ${SOURCE_PATH}
 	PREFER_NINJA
 	OPTIONS
-	-DWAVM_ENABLE_RUNTIME=OFF
 	-DWAVM_ENABLE_FUZZ_TARGETS=OFF
 )
 
@@ -27,7 +26,7 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
 endif()
 
 vcpkg_fixup_cmake_targets(
-	CONFIG_PATH "lib/cmake/wavm"
+	CONFIG_PATH "lib/cmake/WAVM"
 	TARGET_PATH "share/wavm"
 )
 
