@@ -69,7 +69,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -GNinja -DTRACY_ENABLE ..
+          cmake -GNinja -DTRACY_ENABLE=ON ..
 
       - name: compile
         run: ninja -C build
