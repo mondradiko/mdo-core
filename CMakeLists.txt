@@ -3,6 +3,7 @@ include(cmake/prelude.cmake)
 project(mdo-core VERSION 0.0.0)
 
 # options
+option(COMPILE_SHADERS "Compile shaders in bulid tree.")
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
 if(MSVC)
@@ -64,11 +65,11 @@ set(SHADERS_SRC
   shaders/debug.vert
 )
 
-if(NOT MSVC)
+if(COMPILE_SHADERS)
   spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
   add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
 else()
-  message(WARNING "Shader compilation is disabled on Windows for now.")
+  message(WARNING "Shader compilation is disabled.")
   message(WARNING "Ask Marceline on Discord for a .zip of the current shaders.")
 endif()
 
