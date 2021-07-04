@@ -4,6 +4,7 @@
 #pragma once
 
 #include "gpu/gpu_device.h"
+#include "renderer/debug/debug_draw.h"
 #include "renderer/camera.h"
 
 /** @typedef renderer_t
@@ -26,6 +27,10 @@ void renderer_delete (renderer_t *);
 /** @function renderer_get_gpu
  */
 gpu_device_t *renderer_get_gpu (renderer_t *);
+
+/** @function renderer_get_debug_draw_list
+ */
+debug_draw_list_t *renderer_get_debug_draw_list (renderer_t *);
 
 /** @function renderer_render_frame
  */

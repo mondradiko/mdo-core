@@ -290,7 +290,7 @@ viewport_get_image_index (viewport_t *vp)
 void
 viewport_begin_render_pass (viewport_t *vp, VkCommandBuffer cmd)
 {
-  VkClearValue clear_value = { .color = { 1.0, 0.0, 0.0, 1.0 } };
+  VkClearValue clear_value = { .color = { 0.0, 0.0, 0.0, 1.0 } };
 
   VkRenderPassBeginInfo begin_info = {
     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

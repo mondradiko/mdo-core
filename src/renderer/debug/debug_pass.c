@@ -2,8 +2,10 @@
  */
 
 #include "renderer/debug/debug_pass.h"
+
 #include "gpu/gpu_device.h"
 #include "gpu/gpu_shader.h"
+#include "renderer/debug/debug_draw.h"
 
 /* TODO(marceline-cramer): custom logging */
 #include <stdio.h> /* for fprintf */
@@ -17,20 +19,14 @@ struct debug_pass_s
   gpu_device_t *gpu;
   VkDevice vkd;
 
+  debug_draw_list_t *ddl;
+
   gpu_shader_t *vertex_shader;
   gpu_shader_t *fragment_shader;
 
   VkPipelineLayout pipeline_layout;
   VkPipeline pipeline;
 };
-
-typedef struct debug_vertex_s
-{
-  float position[3];
-  float color[3];
-} debug_vertex_t;
-
-typedef uint32_t debug_index_t;
 
 static int
 create_pipeline_layout (debug_pass_t *dbp)
@@ -89,7 +85,7 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
 
   VkVertexInputBindingDescription binding_desc = {
     .binding = 0,
-    .stride = sizeof (debug_vertex_t),
+    .stride = sizeof (debug_draw_vertex_t),
     .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
   };
 
@@ -99,14 +95,14 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
     .binding = 0,
     .location = 0,
     .format = VK_FORMAT_R32G32B32_SFLOAT,
-    .offset = offsetof (debug_vertex_t, position),
+    .offset = offsetof (debug_draw_vertex_t, position),
   };
 
   attribute_descs[1] = (VkVertexInputAttributeDescription){
     .binding = 0,
     .location = 1,
     .format = VK_FORMAT_R32G32B32_SFLOAT,
-    .offset = offsetof (debug_vertex_t, color),
+    .offset = offsetof (debug_draw_vertex_t, color),
   };
 
   VkPipelineVertexInputStateCreateInfo vertex_input_state = {
@@ -119,7 +115,7 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
 
   VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-    .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    .topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
   };
 
   VkViewport viewport = {0};
@@ -210,11 +206,19 @@ debug_pass_new (debug_pass_t **new_dbp, renderer_t *ren, VkRenderPass rp)
   dbp->gpu = renderer_get_gpu (ren);
   dbp->vkd = gpu_device_get (dbp->gpu);
 
+  dbp->ddl = NULL;
+
   dbp->vertex_shader = NULL;
   dbp->fragment_shader = NULL;
 
   dbp->pipeline_layout = VK_NULL_HANDLE;
   dbp->pipeline = VK_NULL_HANDLE;
+
+  if (debug_draw_list_new (&dbp->ddl))
+    {
+      fprintf (stderr, "failed to create debug pass draw list\n");
+      return 1;
+    }
 
   if (load_shaders (dbp))
     return 1;
@@ -243,7 +247,16 @@ debug_pass_delete (debug_pass_t *dbp)
   if (dbp->fragment_shader)
     gpu_shader_delete (dbp->fragment_shader);
 
+  if (dbp->ddl)
+    debug_draw_list_delete (dbp->ddl);
+
   free (dbp);
+}
+
+debug_draw_list_t *
+debug_pass_get_draw_list (debug_pass_t *dbp)
+{
+  return dbp->ddl;
 }
 
 int
@@ -284,18 +297,18 @@ void
 debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
                    struct debug_frame_data *frame)
 {
-  frame->vertex_num = 3;
-  const debug_vertex_t vertices[] = {
-    { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } },
-    { { 1.0, 1.0, 0.0 }, { 0.0, 1.0, 1.0 } },
-    { { -1.0, 1.0, 0.0 }, { 1.0, 0.0, 1.0 } },
-  };
+  frame->vertex_num = debug_draw_list_vertex_num (dbp->ddl);
+  frame->index_num = debug_draw_list_index_num (dbp->ddl);
 
-  frame->index_num = 3;
-  const debug_index_t indices[] = { 0, 1, 2 };
+  const debug_draw_vertex_t *vertices = debug_draw_list_vertices (dbp->ddl);
+  const debug_draw_index_t *indices = debug_draw_list_indices (dbp->ddl);
 
-  gpu_vector_write (frame->vertices, vertices, sizeof (debug_vertex_t), 3);
-  gpu_vector_write (frame->indices, indices, sizeof (debug_index_t), 3);
+  gpu_vector_write (frame->vertices, vertices, sizeof (debug_draw_vertex_t),
+                    frame->vertex_num);
+  gpu_vector_write (frame->indices, indices, sizeof (debug_draw_index_t),
+                    frame->index_num);
+
+  debug_draw_list_clear (dbp->ddl);
 
   VkBuffer vertex_buffer = gpu_vector_get (frame->vertices);
   VkBuffer index_buffer = gpu_vector_get (frame->indices);
