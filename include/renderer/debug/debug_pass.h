@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "renderer/debug/debug_draw.h"
 #include "renderer/debug/debug_frame_data.h"
 #include "renderer/render_phases.h"
 #include "renderer/renderer.h"
@@ -18,6 +19,10 @@ int debug_pass_new (debug_pass_t **, renderer_t *, VkRenderPass);
 /** @function debug_pass_delete
  */
 void debug_pass_delete (debug_pass_t *);
+
+/** @function debug_pass_get_draw_list
+ */
+debug_draw_list_t *debug_pass_get_draw_list (debug_pass_t *);
 
 /** @function debug_frame_data_init
  */

@@ -253,6 +253,12 @@ debug_pass_delete (debug_pass_t *dbp)
   free (dbp);
 }
 
+debug_draw_list_t *
+debug_pass_get_draw_list (debug_pass_t *dbp)
+{
+  return dbp->ddl;
+}
+
 int
 debug_frame_data_init (debug_pass_t *dbp, struct debug_frame_data *frame)
 {
@@ -291,24 +297,6 @@ void
 debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
                    struct debug_frame_data *frame)
 {
-  /* temporary debug draw */
-  {
-    debug_draw_vertex_t vertex1 = {
-      .color = { 1.0, 0.0, 0.0 },
-      .position = { 0.5, 0.5, 0.0 },
-    };
-
-    debug_draw_vertex_t vertex2 = {
-      .color = { 0.0, 1.0, 0.0 },
-      .position = { 0.5, -0.5, 0.0 },
-    };
-
-    debug_draw_index_t index1 = debug_draw_list_vertex (dbp->ddl, &vertex1);
-    debug_draw_index_t index2 = debug_draw_list_vertex (dbp->ddl, &vertex2);
-
-    debug_draw_list_line (dbp->ddl, index1, index2);
-  }
-
   frame->vertex_num = debug_draw_list_vertex_num (dbp->ddl);
   frame->index_num = debug_draw_list_index_num (dbp->ddl);
 

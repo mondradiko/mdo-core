@@ -155,6 +155,12 @@ renderer_get_gpu (renderer_t *ren)
   return ren->gpu;
 }
 
+debug_draw_list_t *
+renderer_get_debug_draw_list (renderer_t *ren)
+{
+  return debug_pass_get_draw_list (ren->debug_pass);
+}
+
 void
 renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 {
