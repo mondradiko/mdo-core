@@ -1,21 +1,39 @@
 cmake_minimum_required(VERSION 3.13)
+include(cmake/prelude.cmake)
 project(mdo-core VERSION 0.0.0)
 
 # options
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
+if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  set(BUILD_SHARED_LIBS TRUE)
+ endif()
+
 include_directories(include)
 
 # dependencies
-find_package(SDL2 REQUIRED)
+#include(FindVulkan)
+#if(NOT Vulkan_FOUND)
+# message(FATAL_ERROR "Vulkan not found.")
+#endif()
+#if(NOT Vulkan_GLSLC_EXECUTABLE)
+#  message(FATAL_ERROR "glslc not found.")
+#endif()
 
-include(FindVulkan)
-if(NOT Vulkan_FOUND)
-  message(FATAL_ERROR "Vulkan not found.")
-endif()
-if(NOT Vulkan_GLSLC_EXECUTABLE)
-  message(FATAL_ERROR "glslc not found.")
-endif()
+find_mondradiko_dependency(
+  mondradiko::vulkan "Vulkan" NOCONFIG
+  INSTALL "vulkan-sdk"
+  Vulkan::Vulkan
+)
+
+find_mondradiko_dependency(
+  mondradiko::sdl2 "SDL2" SDL2::SDL2main
+  INSTALL "sdl2[vulkan]"
+  UNIX SDL2::SDL2-static
+  # UNIX SDL2::SDL2
+  WIN32 SDL2::SDL2
+)
 
 # shaders
 function(spirv_shader ret GLSL VAR)
@@ -46,8 +64,13 @@ set(SHADERS_SRC
   shaders/debug.vert
 )
 
-spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
-add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+if(NOT MSVC)
+  spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
+  add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+else()
+  message(WARNING "Shader compilation is disabled on Windows for now.")
+  message(WARNING "Ask Marceline on Discord for a .zip of the current shaders.")
+endif()
 
 # main library
 set(MDO_CORE_SRC
@@ -70,8 +93,8 @@ endif()
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
-  SDL2::SDL2
-  Vulkan::Vulkan
+  mondradiko::sdl2
+  mondradiko::vulkan
 )
 
 add_executable(mdo-cli cli/main.c)
