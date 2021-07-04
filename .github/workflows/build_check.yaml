@@ -10,7 +10,7 @@ on:
 
 defaults:
   run:
-    shell: ash
+    shell: bash
 jobs:
   build:
     strategy:
