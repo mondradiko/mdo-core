@@ -18,6 +18,8 @@
 #include <SDL2/SDL_vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+#define MAX_VULKAN_EXTENSIONS 16
+
 struct sdl_display_s
 {
   SDL_Window *window;
@@ -49,8 +51,8 @@ create_window (sdl_display_t *dp)
 static int
 get_instance_extensions (sdl_display_t *dp)
 {
-  unsigned int num_exts = 16;
-  const char *ext_list[num_exts];
+  unsigned int num_exts = MAX_VULKAN_EXTENSIONS;
+  const char *ext_list[MAX_VULKAN_EXTENSIONS];
   SDL_Vulkan_GetInstanceExtensions (dp->window, &num_exts, ext_list);
 
   int list_len = num_exts; /* room for spaces and null terminator */

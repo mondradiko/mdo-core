@@ -7,6 +7,8 @@
 #include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
+
+#include <TracyC.h>
 #include <vulkan/vulkan_core.h>
 
 #include "gpu/gpu_device.h"
@@ -281,4 +283,6 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
           fprintf (stderr, "failed to present to swapchains\n");
         }
     }
+
+  TracyCFrameMarkNamed ("render");
 }

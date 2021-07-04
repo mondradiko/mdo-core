@@ -1,0 +1,6 @@
+[submodule "lib/Tracy"]
+	path = lib/Tracy
+	url = https://github.com/wolfpld/Tracy
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/Microsoft/vcpkg
