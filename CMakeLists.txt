@@ -5,6 +5,11 @@ project(mdo-core VERSION 0.0.0)
 # options
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
+if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  set(BUILD_SHARED_LIBS TRUE)
+ endif()
+
 include_directories(include)
 
 # dependencies
@@ -27,7 +32,7 @@ find_mondradiko_dependency(
   INSTALL "sdl2[vulkan]"
   # UNIX SDL2::SDL2-static
   # UNIX SDL2::SDL2
-  # WIN32 SDL2::SDL2
+  WIN32 SDL2::SDL2
 )
 
 # shaders
@@ -60,7 +65,7 @@ set(SHADERS_SRC
 )
 
 spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
-add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+#add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
 
 # main library
 set(MDO_CORE_SRC
