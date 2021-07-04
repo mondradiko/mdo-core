@@ -193,7 +193,7 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
 
   const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
 
-  VkPhysicalDeviceFeatures device_features = {};
+  VkPhysicalDeviceFeatures device_features = {0};
 
   VkDeviceCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,

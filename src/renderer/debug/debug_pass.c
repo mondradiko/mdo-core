@@ -122,8 +122,8 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
     .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   };
 
-  VkViewport viewport = {};
-  VkRect2D scissor = {};
+  VkViewport viewport = {0};
+  VkRect2D scissor = {0};
 
   VkPipelineViewportStateCreateInfo viewport_state = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
