@@ -30,7 +30,7 @@ find_mondradiko_dependency(
 find_mondradiko_dependency(
   mondradiko::sdl2 "SDL2" SDL2::SDL2main
   INSTALL "sdl2[vulkan]"
-  # UNIX SDL2::SDL2-static
+  UNIX SDL2::SDL2-static
   # UNIX SDL2::SDL2
   WIN32 SDL2::SDL2
 )
