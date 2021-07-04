@@ -1,0 +1,4 @@
+Source: wavm
+Version: nightly/2021-05-10
+Description: WAVM is a WebAssembly virtual machine, designed for use in non-web applications.
+Homepage: https://wavm.github.io
