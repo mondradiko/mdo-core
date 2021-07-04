@@ -64,8 +64,13 @@ set(SHADERS_SRC
   shaders/debug.vert
 )
 
-spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
-#add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+if(NOT MSVC)
+  spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
+  add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+else()
+  message(WARNING "Shader compilation is disabled on Windows for now.")
+  message(WARNING "Ask Marceline on Discord for a .zip of the current shaders.")
+endif()
 
 # main library
 set(MDO_CORE_SRC
