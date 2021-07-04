@@ -66,6 +66,26 @@ cleanup_cli_state (cli_state_t *cli)
     gpu_device_delete (cli->gpu);
 }
 
+static void
+temporary_debug_draw (debug_draw_list_t *ddl)
+{
+
+  debug_draw_vertex_t vertex1 = {
+    .color = { 1.0, 0.0, 0.0 },
+    .position = { 0.5, 0.5, 0.0 },
+  };
+
+  debug_draw_vertex_t vertex2 = {
+    .color = { 0.0, 1.0, 0.0 },
+    .position = { 0.5, -0.5, 0.0 },
+  };
+
+  debug_draw_index_t index1 = debug_draw_list_vertex (ddl, &vertex1);
+  debug_draw_index_t index2 = debug_draw_list_vertex (ddl, &vertex2);
+
+  debug_draw_list_line (ddl, index1, index2);
+}
+
 int
 main ()
 {
@@ -84,6 +104,7 @@ main ()
       if (poll.should_render)
         {
           camera_t *camera = sdl_display_camera (cli.dp);
+          temporary_debug_draw (renderer_get_debug_draw_list (cli.ren));
           renderer_render_frame (cli.ren, &camera, 1);
         }
     }
