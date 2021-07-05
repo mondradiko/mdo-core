@@ -49,6 +49,11 @@ find_mondradiko_dependency(
   OpenXR::openxr-all-supported
 )
 
+find_mondradiko_dependency(
+  mondradiko::flecs "flecs" flecs::flecs_static
+  INSTALL "flecs"
+)
+
 # shaders
 function(spirv_shader ret GLSL VAR)
   set(SPIRV "${CMAKE_CURRENT_BINARY_DIR}/${GLSL}.spv")
@@ -112,6 +117,7 @@ target_link_libraries(mdo-core
   mondradiko::vulkan
   mondradiko::libuv
   mondradiko::openxr
+  mondradiko::flecs
 )
 
 add_executable(mdo-cli cli/main.c)
