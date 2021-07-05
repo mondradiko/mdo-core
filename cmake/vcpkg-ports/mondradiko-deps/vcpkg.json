@@ -6,6 +6,7 @@
   "homepage": "https://github.com/mondradiko/mondradiko",
   "dependencies": [
     "vulkan-sdk",
+    "libuv",
     {
       "name": "sdl2",
       "features": [ "vulkan" ]
