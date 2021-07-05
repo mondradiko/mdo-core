@@ -36,6 +36,11 @@ find_mondradiko_dependency(
   WIN32 SDL2::SDL2
 )
 
+find_mondradiko_dependency(
+  mondradiko::wavm "WAVM" WAVM::libWAVM
+  INSTALL "wavm"
+)
+
 # shaders
 function(spirv_shader ret GLSL VAR)
   set(SPIRV "${CMAKE_CURRENT_BINARY_DIR}/${GLSL}.spv")
@@ -97,6 +102,7 @@ add_library(mdo-core SHARED ${MDO_CORE_SRC})
 target_link_libraries(mdo-core
   mondradiko::sdl2
   mondradiko::vulkan
+  mondradiko::wavm
 )
 
 add_executable(mdo-cli cli/main.c)
