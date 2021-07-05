@@ -41,6 +41,14 @@ find_mondradiko_dependency(
   INSTALL "libuv"
 )
 
+find_mondradiko_dependency(
+  mondradiko::openxr "OpenXR"
+  INSTALL "openxr-loader"
+  OpenXR::headers
+  OpenXR::openxr_loader
+  OpenXR::openxr-all-supported
+)
+
 # shaders
 function(spirv_shader ret GLSL VAR)
   set(SPIRV "${CMAKE_CURRENT_BINARY_DIR}/${GLSL}.spv")
@@ -103,6 +111,7 @@ target_link_libraries(mdo-core
   mondradiko::sdl2
   mondradiko::vulkan
   mondradiko::libuv
+  mondradiko::openxr
 )
 
 add_executable(mdo-cli cli/main.c)
