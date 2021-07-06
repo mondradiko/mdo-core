@@ -1,6 +1,6 @@
 Outlined below is a detailed exploration of building the Mondradiko toolchain on different platforms:
 
-# x86_x64 (w/ vcpkg)
+# Win32 (w/ vcpkg)
 
 You need to run the "x64 Native Tools Command Prompt," remove your build directory, and configure cmake with that specific 
 command prompt and a clean build directory, that way the proper windows compiler ecosystem gets used by vcpkg.
@@ -9,14 +9,14 @@ What's happening, in instances where vcpkg bootstraps but fails to run, is that 
 failing to install the proper dependencies because of compiler issues; if the cmake commandline tool isn't available with 
 that prompt, you can install it with Chocolatey.
 
-# x86_x64 (w/ POSIX Layer)
+# Win32 (w/ POSIX Layer)
 
 Generally, install vcpkg, and cmake to your favorite application for this purpose(cygwin, mingw64, WSL-Ubuntu). Clone the mdo-core
 directory to your home folder, cd into the folder and use cmake -s home/(src) -b home/(src)/build. Be sure to set USE_LAZY_VCPKG to
 TRUE before building otherwise you will need each library installed locally (though this boils down to trivial apt-get and install 
 calls if you neglect the use of vcpkg in such an environment)
 
-# x86_64 (w/o vcpkg, POSIX Layer AKA Manually w/ CMake)
+# Win32 (w/o vcpkg, POSIX Layer AKA Manually w/ CMake)
 
 **Before you start: Install the VulkanSDK.**
 
@@ -48,6 +48,12 @@ Create directories in root for each library to put their source in:
 set each (Library_name)__DIR__ variable to each library directory in root, Configure; confirm your Shaders folder contains debug.frag, debug.vert, 
 be sure to ask Marceline for the latest .SPV shaders (join our discord!) Configure, Generate.
 
+## mdo-cli
+Requires all the libraries in question and a mdo-core.lib reference. When mdo-core finishes building take the .lib file and place it in mdo-core/lib.
+
+## mdo-utils
+Requires a reference to mdo-config.cmake.in, and mdo-utils-config.cmake use mdo-core/build as your MDO_CORE_DIR. mdo-config.cmake.in will appear in the mdo-utils/cmake folder.
+
 ### Potential Issues/Side-Steps:
 Generate may fail with some known errors, here's how to handle them in order:
 
@@ -72,12 +78,6 @@ to the mdo-core/include folder, name it json.
 *tracy* - 
 Create a "Tracy" folder in mdo-core/include rather than root, set TRACY_ENABLE to true in CMake and be sure to clone the TracyC git directory into the mdo-core/include/tracy folder.
 
-## mdo-cli
-Requires all the libraries in question and a mdo-core.lib reference. When mdo-core finishes building take the .lib file and place it in mdo-core/lib.
-
-## mdo-utils
-Requires a reference to mdo-config.cmake.in, and mdo-utils-config.cmake use mdo-core/build as your MDO_CORE_DIR. mdo-config.cmake.in will appear in the mdo-utils/cmake folder.
-
 ### Visual Studio Steps
 After having generated the necessary files with CMake you will need to change some Project Properties.
 
@@ -91,6 +91,9 @@ For this reason you can remove the Input reference to openxr-all-supported.lib. 
 
 Build the Solution, be sure to create a final folder in the location of mdo-cli.exe called "shaders" and place the .SPV shaders inside; if all done correctly congratulations!
 you have manually built the Mondradiko Toolchain on Win32!
+
+# x86_x64 (Ubuntu)
+TBA (cmake)
 
 # i386 (ARMv7/v8)
 TBA (cmake)
