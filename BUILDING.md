@@ -50,25 +50,25 @@ be sure to ask Marceline for the latest .SPV shaders (join our discord!) Configu
 ### Potential Issues/Side-Steps:
 Generate may fail with some known errors, here's how to handle them in order:
 
-*cmocka*
+*cmocka* - 
 Even when downloading cmocka from the appropriate website it's release is apparently packaged as a 32-bit library which, as of 2019, will throw
 an error in cmake that is really warning you of an error VS/XCode will throw when trying to build a 64-bit application against non-x64 source.
 
 There is no workaround to this on Windows or Mac short of simply building the library locally; move all built source to the mdo-core/lib folder afterward.  
 
-*SDL2*
+*SDL2* - 
 When not using vcpkg, you will have to build SDL2 using cmake. Configure the in folder sdl2 directory with cmake and be sure to move it's 
 SDL2Targets.cmake (it will be under Build/CMake) to the same folder as SDL2-Config.cmake. mdo-core's SDL2_DIR_ must contain both.
 
-*libuv*
+*libuv* - 
 Normally, vcpkg will download unofficial-libuv::libuv and build it locally. As a workaround you can use [dacap/libuv-cmake]("https://github.com/dacap/libuv-cmake")
 follow his readme and put the built uv.lib in the mdo-core/libs folder 
 
-*openxr*
+*openxr* - 
 OpenXR needs JsonCpp to fully function, download it's source and use cmake to configure and generate OpenXR's VS Solution. Take JsonCpp source's Include folder and copy it
 to the mdo-core/include folder, name it json.
 
-*tracy*
+*tracy* - 
 Create a "Tracy" folder in mdo-core/include, set TRACY_ENABLE to true in CMake.
 
 ## mdo-cli
@@ -92,5 +92,4 @@ Build the Solution, be sure to create a final folder in the location of mdo-cli.
 you have manually built the Mondradiko Toolchain on Win32!
 
 # i386 (ARMv7/v8)
-
 TBA (cmake)
