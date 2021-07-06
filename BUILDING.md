@@ -37,12 +37,12 @@ and X_VCPKG_APP_LOCAL_DEPS_INSTALL set to true and USE_LAZY_VCPKG set to false; 
 
 Create directories in root for each library to put their source in:
 
-SDL2
-libuv
-openxr (additonally create a jsoncpp dir in the openxr dir)
-flecs 
-cmocka 
-tracy
+-SDL2
+-libuv
+-openxr (additonally create a jsoncpp dir in the openxr dir)
+-flecs 
+-cmocka 
+-tracy
 
 set each (Library_name)__DIR__ variable to each library directory in root, Configure; confirm your Shaders folder contains debug.frag, debug.vert, 
 be sure to ask Marceline for the latest .SPV shaders (join our discord!) Configure, Generate.
