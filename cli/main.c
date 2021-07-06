@@ -5,12 +5,14 @@
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
 #include "renderer/renderer.h"
+#include "world/world.h"
 
 typedef struct cli_state_s
 {
   sdl_display_t *dp;
   gpu_device_t *gpu;
   renderer_t *ren;
+  world_t *w;
 } cli_state_t;
 
 int
@@ -18,6 +20,8 @@ init_cli_state (cli_state_t *cli)
 {
   cli->dp = NULL;
   cli->gpu = NULL;
+  cli->ren = NULL;
+  cli->w = NULL;
 
   if (sdl_display_new (&cli->dp))
     {
@@ -47,12 +51,21 @@ init_cli_state (cli_state_t *cli)
       return 1;
     }
 
+  if (world_new (&cli->w, renderer_get_debug_draw_list (cli->ren)))
+    {
+      fprintf (stderr, "failed to create world\n");
+      return 1;
+    }
+
   return 0;
 }
 
 void
 cleanup_cli_state (cli_state_t *cli)
 {
+  if (cli->w)
+    world_delete (cli->w);
+
   if (cli->ren)
     renderer_delete (cli->ren);
 
@@ -100,6 +113,11 @@ main ()
   while (!poll.should_exit)
     {
       sdl_display_poll (cli.dp, &poll);
+
+      if (poll.should_run)
+        {
+          world_step (cli.w, poll.dt);
+        }
 
       if (poll.should_render)
         {
