@@ -196,7 +196,7 @@ world_new (world_t **new_w, debug_draw_list_t *ddl)
   ecs_entity_t s_c = ecs_component_init (w->ecs, &s_desc);
   ecs_entity_t c_c = ecs_component_init (w->ecs, &c_desc);
 
-  for (int i = 0; i < 25000; i++)
+  for (int i = 0; i < 1000; i++)
     {
       ecs_entity_t e = ecs_new_id (w->ecs);
       randomize_transform (ecs_get_mut_w_id (w->ecs, e, t_c, NULL));
