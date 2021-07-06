@@ -22,12 +22,13 @@ calls if you neglect the use of vcpkg in such an environment)
 
 You will need to download the source of the following Libraries/sdks (in addition to the VulkanSDK):
 
-mdo-core(mdo-cli, mdo-utils)
--SDL2
--libuv
--openxr(additonally needs jsoncpp)
--flecs
--cmocka (.exe Installation is fine)
+mdo-core(mdo-cli, mdo-utils):
+
+1. SDL2
+2. libuv
+3. openxr(additonally needs jsoncpp)
+4. flecs
+5. cmocka (.exe Installation is fine)
 
 We then approach the process sequentially by each program listed with an mdo suffix:
 
@@ -37,12 +38,12 @@ and X_VCPKG_APP_LOCAL_DEPS_INSTALL set to true and USE_LAZY_VCPKG set to false; 
 
 Create directories in root for each library to put their source in:
 
--SDL2
--libuv
--openxr (additonally create a jsoncpp dir in the openxr dir)
--flecs 
--cmocka 
--tracy
+- SDL2
+- libuv
+- openxr (additonally create a jsoncpp dir in the openxr dir)
+- flecs 
+- cmocka 
+- tracy
 
 set each (Library_name)__DIR__ variable to each library directory in root, Configure; confirm your Shaders folder contains debug.frag, debug.vert, 
 be sure to ask Marceline for the latest .SPV shaders (join our discord!) Configure, Generate.
@@ -61,7 +62,7 @@ When not using vcpkg, you will have to build SDL2 using cmake. Configure the in 
 SDL2Targets.cmake (it will be under Build/CMake) to the same folder as SDL2-Config.cmake. mdo-core's SDL2_DIR_ must contain both.
 
 *libuv* - 
-Normally, vcpkg will download unofficial-libuv::libuv and build it locally. As a workaround you can use [dacap/libuv-cmake]("https://github.com/dacap/libuv-cmake")
+Normally, vcpkg will download unofficial-libuv::libuv and build it locally. As a workaround you can use [dacap/libuv-cmake](https://github.com/dacap/libuv-cmake)
 follow his readme and put the built uv.lib in the mdo-core/libs folder 
 
 *openxr* - 
