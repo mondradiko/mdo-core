@@ -69,7 +69,7 @@ OpenXR needs JsonCpp to fully function, download it's source and use cmake to co
 to the mdo-core/include folder, name it json.
 
 *tracy* - 
-Create a "Tracy" folder in mdo-core/include, set TRACY_ENABLE to true in CMake.
+Create a "Tracy" folder in mdo-core/include rather than root, set TRACY_ENABLE to true in CMake and be sure to clone the TracyC git directory into the mdo-core/include/tracy folder.
 
 ## mdo-cli
 Requires all the libraries in question and a mdo-core.lib reference. When mdo-core finishes building take the .lib file and place it in mdo-core/lib.
