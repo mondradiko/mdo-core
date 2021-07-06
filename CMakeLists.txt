@@ -102,6 +102,7 @@ set(MDO_CORE_SRC
   src/renderer/camera.c
   src/renderer/renderer.c
   src/renderer/viewport.c
+  src/world/world.c
 )
 
 if(TRACY_ENABLE)
