@@ -47,7 +47,7 @@ tracy
 set each (Library_name)__DIR__ variable to each library directory in root, Configure; confirm your Shaders folder contains debug.frag, debug.vert, 
 be sure to ask Marceline for the latest .SPV shaders (join our discord!) Configure, Generate.
 
-## Potential Issues/Side-Steps:
+### Potential Issues/Side-Steps:
 Generate may fail with some known errors, here's how to handle them in order:
 
 *cmocka*
@@ -77,7 +77,7 @@ Requires all the libraries in question and a mdo-core.lib reference. When mdo-co
 ## mdo-utils
 Requires a reference to mdo-config.cmake.in, and mdo-utils-config.cmake use mdo-core/build as your MDO_CORE_DIR. mdo-config.cmake.in will appear in the mdo-utils/cmake folder.
 
-## Visual Studio Steps
+### Visual Studio Steps
 After having generated the necessary files with CMake you will need to change some Project Properties.
 
 Linking: Change the Additional Libraries directory to {LOCAL_SYSTEM}/mdo-core/lib, and to the location of the VulkanSDK (alternatively, copy Vulkan's .h headers 
