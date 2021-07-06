@@ -258,11 +258,17 @@ viewport_acquire (viewport_t *vp)
   VkSemaphore on_acquire = vp->on_image_acquire[vp->image_acquire_index];
 
   uint32_t image_index;
-  vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
-                         VK_NULL_HANDLE, &image_index);
+  VkResult result
+      = vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
+                               VK_NULL_HANDLE, &image_index);
+
+  if (result != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to acquire swapchain image\n");
+      return 0;
+    }
 
   vp->image_index = image_index;
-
   return 1;
 }
 
