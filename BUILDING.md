@@ -93,4 +93,4 @@ you have manually built the Mondradiko Toolchain on Win32!
 
 # i386 (ARMv7/v8)
 
-TBA (make? clang?)
+TBA (cmake)
