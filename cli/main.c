@@ -1,31 +1,36 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 
 #include "displays/display.h"
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
 #include "renderer/renderer.h"
-#include "world/world.h"
+#include <mdo-log.h>
 
 typedef struct cli_state_s
 {
   sdl_display_t *dp;
   gpu_device_t *gpu;
   renderer_t *ren;
-  world_t *w;
 } cli_state_t;
 
-int
-init_cli_state (cli_state_t *cli)
+void mdo_log_format_color (WORD colorCode)
+{
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, colorCode);
+  free (hConsole);
+}
+
+int init_cli_state (cli_state_t *cli)
 {
   cli->dp = NULL;
   cli->gpu = NULL;
-  cli->ren = NULL;
-  cli->w = NULL;
 
   if (sdl_display_new (&cli->dp))
     {
-      fprintf (stderr, "failed to create SDL display\n");
+      mdo_log_format_color (WIN32_MDO_LOG_ERROR_COLOR);
+      fprintf (stderr, "failed to create SDL display");
       return 1;
     }
 
@@ -34,12 +39,14 @@ init_cli_state (cli_state_t *cli)
 
   if (gpu_device_new (&cli->gpu, &vk_config))
     {
+      mdo_log_format_color (WIN32_MDO_LOG_ERROR_COLOR);
       fprintf (stderr, "failed to create GPU device\n");
       return 1;
     }
 
   if (sdl_display_begin_session (cli->dp, cli->gpu))
     {
+      mdo_log_format_color (WIN32_MDO_LOG_ERROR_COLOR);
       fprintf (stderr, "failed to begin SDL session\n");
       return 1;
     }
@@ -47,13 +54,8 @@ init_cli_state (cli_state_t *cli)
   VkRenderPass rp = camera_get_render_pass (sdl_display_get_camera (cli->dp));
   if (renderer_new (&cli->ren, cli->gpu, rp))
     {
+      mdo_log_format_color (WIN32_MDO_LOG_ERROR_COLOR);
       fprintf (stderr, "failed to create renderer\n");
-      return 1;
-    }
-
-  if (world_new (&cli->w, renderer_get_debug_draw_list (cli->ren)))
-    {
-      fprintf (stderr, "failed to create world\n");
       return 1;
     }
 
@@ -63,9 +65,6 @@ init_cli_state (cli_state_t *cli)
 void
 cleanup_cli_state (cli_state_t *cli)
 {
-  if (cli->w)
-    world_delete (cli->w);
-
   if (cli->ren)
     renderer_delete (cli->ren);
 
@@ -113,11 +112,6 @@ main ()
   while (!poll.should_exit)
     {
       sdl_display_poll (cli.dp, &poll);
-
-      if (poll.should_run)
-        {
-          world_step (cli.w, poll.dt);
-        }
 
       if (poll.should_render)
         {

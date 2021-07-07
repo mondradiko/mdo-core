@@ -1,4 +1,4 @@
 Source: flecs
-Version: 19b9d35
+Version: 2.3.2
 Homepage: https://github.com/SanderMertens/flecs
 Description:  A fast entity component system (ECS) for C & C++

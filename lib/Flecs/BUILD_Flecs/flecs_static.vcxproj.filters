@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\bulk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\dbg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\deprecated.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\direct_access.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\module.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\parser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\queue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\reader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\snapshot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\stats.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\addons\writer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\api_support.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\bitset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\bootstrap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\entity.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\filter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\hash.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\hashmap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\hierarchy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\iter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\log.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\map.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\modules\pipeline\pipeline.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\modules\pipeline\worker.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\modules\system\system.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\modules\system\system_dbg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\modules\timer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\observer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\os_api.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\query.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\sparse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\stage.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\strbuf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\switch_list.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\table.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\table_graph.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\trigger.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\type.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\vector.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\src\world.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\bulk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\dbg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\deprecated.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\deprecated\entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\deprecated\flecs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\deprecated\iter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\deprecated\type.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\direct_access.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\reader_writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\snapshot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\addons\stats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\bake_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\builder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\component.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\filter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\filter_iterator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\function_traits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl\builder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl\entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl\iter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl\lifecycle_traits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\impl\world.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\invoker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\iter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\lifecycle_traits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\module.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\observer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\pair.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\query.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\reader_writer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\snapshot.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\type.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\util.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\cpp\world.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\flecs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\modules\pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\modules\system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\modules\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\os_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\api_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\api_support.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\api_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\hashmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\sparse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\strbuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\switch_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\private\vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\include\flecs\type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{842999E5-A4C1-3B5C-998E-5406A83CBF75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{995390BF-A21A-39C2-977C-73AF3C0DFF48}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -7,8 +7,9 @@
 #include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
+#include <log.h>
 
-#include <TracyC.h>
+#include <Tracy/TracyC.h>
 #include <vulkan/vulkan_core.h>
 
 #include "gpu/gpu_device.h"
@@ -193,16 +194,8 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       viewport_num += acquired_num;
     }
 
-  int acquired_num = 0;
-  for (int i = 0; i < viewport_num; i++) {
-    if (viewport_acquire (viewports[i])) {
-      viewports[acquired_num] = viewports[i];
-      acquired_num++;
-    }
-  }
-
-  /* cull out unacquired viewports */
-  viewport_num = acquired_num;
+  for (int i = 0; i < viewport_num; i++)
+    viewport_acquire (viewports[i]);
 
   int swapchain_num = 0;
   VkSwapchainKHR swapchains[MAX_VIEWPORT_NUM];

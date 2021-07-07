@@ -1,8 +1,7 @@
-/** @file viewport.c
+﻿/** @file viewport.c
  */
 
 #include "renderer/viewport.h"
-
 #include "gpu/gpu_device.h"
 #include "renderer/render_phases.h"
 
@@ -12,8 +11,13 @@
 #include <stdlib.h> /* for mem alloc */
 
 #include <vulkan/vulkan_core.h>
+#include <mdo-log.h>
 
+#define MAX_EXTENSIONS 32
+#define MAX_PHYSICAL_DEVICES 32
+#define MAX_QUEUE_FAMILIES 32
 #define MAX_IMAGE_NUM 8
+
 
 struct vp_image
 {
@@ -43,7 +47,11 @@ struct viewport_s
 static int
 surface_init (viewport_t *vp, const struct viewport_config *config)
 {
-  fprintf (stderr, "creating surface-based viewport\n");
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_DEBUG_COLOR);
+
+  fprintf (stderr, MDO_LOG_DEBUG "creating surface-based viewport\n");
 
   VkPhysicalDevice vkpd = gpu_device_get_physical (vp->gpu);
   int gfx_family = gpu_device_gfx_family (vp->gpu);
@@ -258,17 +266,11 @@ viewport_acquire (viewport_t *vp)
   VkSemaphore on_acquire = vp->on_image_acquire[vp->image_acquire_index];
 
   uint32_t image_index;
-  VkResult result
-      = vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
-                               VK_NULL_HANDLE, &image_index);
-
-  if (result != VK_SUCCESS)
-    {
-      fprintf (stderr, "failed to acquire swapchain image\n");
-      return 0;
-    }
+  vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
+                         VK_NULL_HANDLE, &image_index);
 
   vp->image_index = image_index;
+
   return 1;
 }
 

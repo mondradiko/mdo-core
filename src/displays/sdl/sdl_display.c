@@ -197,7 +197,6 @@ void
 sdl_display_poll (sdl_display_t *dp, struct display_poll_t *poll)
 {
   poll->should_exit = 0;
-  poll->should_run = 1;
   poll->should_render = 1;
 
   SDL_Event e;

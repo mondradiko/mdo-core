@@ -1,0 +1,49 @@
+﻿  Building Custom Rule C:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master/CMakeLists.txt
+  bulk.c
+  dbg.c
+  deprecated.c
+  direct_access.c
+  module.c
+  parser.c
+  queue.c
+  reader.c
+  snapshot.c
+  stats.c
+  writer.c
+  api_support.c
+  bitset.c
+  bootstrap.c
+  entity.c
+  filter.c
+  hash.c
+  hashmap.c
+  hierarchy.c
+  iter.c
+  Generating Code...
+  Compiling...
+  log.c
+  map.c
+  misc.c
+  pipeline.c
+  worker.c
+  system.c
+  system_dbg.c
+  timer.c
+  observer.c
+  os_api.c
+  query.c
+  sparse.c
+  stage.c
+  strbuf.c
+  switch_list.c
+  table.c
+  table_graph.c
+  trigger.c
+  type.c
+  vector.c
+  Generating Code...
+  Compiling...
+  world.c
+  Generating Code...
+     Creating library C:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master/BUILD_Flecs/Release/flecs.lib and object C:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master/BUILD_Flecs/Release/flecs.exp
+  flecs.vcxproj -> C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\BUILD_Flecs\Release\flecs.dll

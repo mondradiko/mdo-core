@@ -1,4 +1,4 @@
-/** @file gpu_device.c
+﻿/** @file gpu_device.c
  */
 
 #include "gpu/gpu_device.h"
@@ -13,10 +13,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
-
-#define MAX_EXTENSIONS 32
-#define MAX_PHYSICAL_DEVICES 32
-#define MAX_QUEUE_FAMILIES 32
+#include <mdo-log.h>
 
 struct gpu_device_s
 {
@@ -26,9 +23,11 @@ struct gpu_device_s
   VkDevice device;
 };
 
-static int
-split_list (char *list, const char *array[MAX_EXTENSIONS])
+static int split_list (char *list, const char *array[MAX_EXTENSIONS])
 {
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+
   size_t len = strlen (list);
   if (len == 0)
     return 0;
@@ -47,11 +46,16 @@ split_list (char *list, const char *array[MAX_EXTENSIONS])
         }
     }
 
-  fprintf (stdout, "num elements: %d\n%s\n", num_elements, list);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_MESSAGE_COLOR);
+
+  fprintf (stdout, MDO_LOG_MESSAGE "num elements: %d\n%s\n", num_elements, list);
 
   if (num_elements > MAX_EXTENSIONS)
     {
-      fprintf (stderr, "ERROR: number of elements in list exceeds maximum\n");
+
+      SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_ERROR_COLOR);
+
+      fprintf (stderr, "顶•(ERR) ERROR: number of elements in list exceeds maximum\n");
       return 0;
     }
 
@@ -77,7 +81,11 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
                 const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
                 void *userdata)
 {
-  fprintf (stderr, "vulkan validation: %s\n", callback_data->pMessage);
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_INFO_COLOR);
+
+  fprintf (stderr, MDO_LOG_INFO "vulkan validation: %s\n", callback_data->pMessage);
   return VK_FALSE;
 }
 
@@ -170,6 +178,10 @@ find_queue_families (gpu_device_t *gpu)
         }
     }
 
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_ERROR_COLOR);
+
   fprintf (stderr, "failed to find necessary queue families\n");
   return -1;
 }
@@ -194,6 +206,10 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
   const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
 
   VkPhysicalDeviceFeatures device_features = {0};
+
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_ERROR_COLOR);
 
   VkDeviceCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -238,6 +254,9 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 
   if (gpu->physical_device == VK_NULL_HANDLE)
     {
+      HANDLE hConsole;
+      hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+      SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_ERROR_COLOR);
       fprintf (stderr, "failed to find Vulkan physical device\n");
       return -1;
     }
@@ -266,8 +285,12 @@ gpu_device_delete (gpu_device_t *gpu)
 VkInstance
 gpu_device_get_instance (gpu_device_t *gpu)
 {
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_WARNING_COLOR);
+
   if (!gpu->instance)
-    fprintf (stderr, "WARN: getting null Vulkan instance\n");
+    fprintf (stderr, MDO_LOG_WARNING "WARN: getting null Vulkan instance\n");
 
   return gpu->instance;
 }
@@ -275,8 +298,12 @@ gpu_device_get_instance (gpu_device_t *gpu)
 VkPhysicalDevice
 gpu_device_get_physical (gpu_device_t *gpu)
 {
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_WARNING_COLOR);
+
   if (!gpu->physical_device)
-    fprintf (stderr, "WARN: getting null Vulkan physical device\n");
+    fprintf (stderr, MDO_LOG_WARNING "WARN: getting null Vulkan physical device\n");
 
   return gpu->physical_device;
 }
@@ -284,8 +311,12 @@ gpu_device_get_physical (gpu_device_t *gpu)
 VkDevice
 gpu_device_get (gpu_device_t *gpu)
 {
+  HANDLE hConsole;
+  hConsole = GetStdHandle (STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute (hConsole, WIN32_MDO_LOG_WARNING_COLOR);
+
   if (!gpu->device)
-    fprintf (stderr, "WARN: getting null Vulkan device\n");
+    fprintf (stderr, MDO_LOG_WARNING "WARN: getting null Vulkan device\n");
 
   return gpu->device;
 }

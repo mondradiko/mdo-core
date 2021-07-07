@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Manda\Desktop\Mondradiko\mdo-core-main\flecs-master\BUILD_Flecs\CMakeFiles\ea57daf93c120fa651d82a7c0595c228\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{F47064A6-A4D8-3675-96BF-AD03D37A5072}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

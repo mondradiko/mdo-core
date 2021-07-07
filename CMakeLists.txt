@@ -3,6 +3,7 @@ include(cmake/prelude.cmake)
 project(mdo-core VERSION 0.0.0)
 
 # options
+option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
 option(COMPILE_SHADERS "Compile shaders in bulid tree.")
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
@@ -102,7 +103,6 @@ set(MDO_CORE_SRC
   src/renderer/camera.c
   src/renderer/renderer.c
   src/renderer/viewport.c
-  src/world/world.c
 )
 
 if(TRACY_ENABLE)

@@ -1,0 +1,10 @@
+^C:\USERS\MANDA\DESKTOP\MONDRADIKO\MDO-CORE-MAIN\FLECS-MASTER\BUILD_FLECS\CMAKEFILES\EA57DAF93C120FA651D82A7C0595C228\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master -BC:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master/BUILD_Flecs --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Manda/Desktop/Mondradiko/mdo-core-main/flecs-master/BUILD_Flecs/flecs.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
