@@ -25,6 +25,8 @@ struct renderer_s
   VkDevice vkd;
   VkQueue present_queue;
 
+  VkDescriptorSetLayout viewport_layout;
+
   debug_pass_t *debug_pass;
 
   struct frame_data frames[MAX_FRAMES_IN_FLIGHT];
@@ -33,11 +35,38 @@ struct renderer_s
 };
 
 static int
+create_viewport_layout (renderer_t *ren)
+{
+  VkDescriptorSetLayoutBinding binding = {
+    .binding = 0,
+    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    .descriptorCount = 1,
+    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+  };
+
+  VkDescriptorSetLayoutCreateInfo ci = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    .bindingCount = 1,
+    .pBindings = &binding,
+  };
+
+  if (vkCreateDescriptorSetLayout (ren->vkd, &ci, NULL, &ren->viewport_layout)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to create viewport descriptor set layout\n");
+      return 1;
+    }
+
+  return 0;
+}
+
+static int
 frame_data_init (renderer_t *ren, struct frame_data *frame)
 {
   frame->command_pool = VK_NULL_HANDLE;
   frame->on_finished = VK_NULL_HANDLE;
   frame->is_in_flight = VK_NULL_HANDLE;
+  frame->descriptor_pool = VK_NULL_HANDLE;
 
   VkCommandPoolCreateInfo cp_ci = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -74,12 +103,36 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
       return 1;
     }
 
+  VkDescriptorPoolSize pool_sizes[1];
+
+  pool_sizes[0] = (VkDescriptorPoolSize){
+    .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    .descriptorCount = 100, /* picked arbitrarily */
+  };
+
+  VkDescriptorPoolCreateInfo dp_ci = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    .maxSets = 1000, /* arbitrarily picked */
+    .poolSizeCount = 1,
+    .pPoolSizes = pool_sizes,
+  };
+
+  if (vkCreateDescriptorPool (ren->vkd, &dp_ci, NULL, &frame->descriptor_pool)
+      != VK_SUCCESS)
+    {
+      fprintf (stderr, "failed to create descriptor pool\n");
+      return 1;
+    }
+
   return 0;
 }
 
 static void
 frame_data_cleanup (renderer_t *ren, struct frame_data *frame)
 {
+  if (frame->descriptor_pool)
+    vkDestroyDescriptorPool (ren->vkd, frame->descriptor_pool, NULL);
+
   if (frame->command_pool)
     vkDestroyCommandPool (ren->vkd, frame->command_pool, NULL);
 
@@ -98,12 +151,16 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu, VkRenderPass rp)
 
   ren->gpu = gpu;
   ren->vkd = gpu_device_get (gpu);
+  ren->viewport_layout = VK_NULL_HANDLE;
   ren->debug_pass = NULL;
   ren->frame_index = 0;
 
   int gfx_family = gpu_device_gfx_family (gpu);
   int queue_index = 0;
   vkGetDeviceQueue (ren->vkd, gfx_family, queue_index, &ren->present_queue);
+
+  if (create_viewport_layout (ren))
+    return 1;
 
   if (debug_pass_new (&ren->debug_pass, ren, rp))
     {
@@ -146,6 +203,9 @@ renderer_delete (renderer_t *ren)
 
   debug_pass_delete (ren->debug_pass);
 
+  if (ren->viewport_layout)
+    vkDestroyDescriptorSetLayout (ren->vkd, ren->viewport_layout, NULL);
+
   free (ren);
 }
 
@@ -159,6 +219,12 @@ debug_draw_list_t *
 renderer_get_debug_draw_list (renderer_t *ren)
 {
   return debug_pass_get_draw_list (ren->debug_pass);
+}
+
+VkDescriptorSetLayout
+renderer_get_viewport_layout (renderer_t *ren)
+{
+  return ren->viewport_layout;
 }
 
 void
@@ -179,6 +245,7 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
   vkWaitForFences (ren->vkd, 1, &frame->is_in_flight, VK_TRUE, UINT64_MAX);
   vkResetFences (ren->vkd, 1, &frame->is_in_flight);
   vkResetCommandPool (ren->vkd, frame->command_pool, 0);
+  vkResetDescriptorPool (ren->vkd, frame->descriptor_pool, 0);
 
   int viewport_num = 0;
   viewport_t *viewports[MAX_VIEWPORT_NUM];
@@ -194,12 +261,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
     }
 
   int acquired_num = 0;
-  for (int i = 0; i < viewport_num; i++) {
-    if (viewport_acquire (viewports[i])) {
-      viewports[acquired_num] = viewports[i];
-      acquired_num++;
+  for (int i = 0; i < viewport_num; i++)
+    {
+      if (viewport_acquire (viewports[i]))
+        {
+          viewports[acquired_num] = viewports[i];
+          acquired_num++;
+        }
     }
-  }
 
   /* cull out unacquired viewports */
   viewport_num = acquired_num;

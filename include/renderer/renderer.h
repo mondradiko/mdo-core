@@ -32,6 +32,10 @@ gpu_device_t *renderer_get_gpu (renderer_t *);
  */
 debug_draw_list_t *renderer_get_debug_draw_list (renderer_t *);
 
+/** @function renderer_get_viewport_layout
+ */
+VkDescriptorSetLayout renderer_get_viewport_layout (renderer_t *);
+
 /** @function renderer_render_frame
  */
 void renderer_render_frame (renderer_t *, camera_t **, int);
