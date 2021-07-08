@@ -7,8 +7,12 @@
 #include <math.h>
 
 #include <TracyC.h>
+#include <cglm/vec3.h>
 #include <flecs.h>
 #include <flecs/modules/system.h>
+
+static const vec3 BLACK_HOLE_POSITION = { 0.0, 0.0, 0.0 };
+static const float BLACK_HOLE_MASS = 10000.0;
 
 struct world_s
 {
@@ -20,15 +24,14 @@ struct world_s
 
 typedef struct transform_component_s
 {
-  float position[2];
+  float position[3];
 } transform_component_t;
 
-typedef struct spin_component_s
+typedef struct star_component_s
 {
-  float phase;
-  float radius;
-  float speed;
-} spin_component_t;
+  float velocity[3];
+  float mass;
+} star_component_t;
 
 typedef struct color_component_s
 {
@@ -36,21 +39,39 @@ typedef struct color_component_s
 } color_component_t;
 
 void
-spin (ecs_iter_t *it)
+orbit (ecs_iter_t *it)
 {
   TracyCZone (ctx, true);
 
   transform_component_t *ts = ecs_term (it, transform_component_t, 1);
-  spin_component_t *ss = ecs_term (it, spin_component_t, 2);
+  star_component_t *ss = ecs_term (it, star_component_t, 2);
 
   for (int i = 0; i < it->count; i++)
     {
       transform_component_t *t = &ts[i];
-      spin_component_t *s = &ss[i];
+      star_component_t *s = &ss[i];
 
-      s->phase += it->delta_time * s->speed;
-      t->position[0] = cos (s->phase) * s->radius;
-      t->position[1] = sin (s->phase) * s->radius;
+      vec3 gravity_dir;
+      glm_vec3_sub (BLACK_HOLE_POSITION, t->position, gravity_dir);
+
+      static const float G = 0.0001;
+      float r2 = glm_vec3_norm2 (gravity_dir);
+      float m1m2 = BLACK_HOLE_MASS * s->mass;
+      float gravity_scale = G * m1m2 / r2;
+
+      vec3 gravity_force;
+      glm_vec3_scale (gravity_dir, gravity_scale, gravity_force);
+
+      /* F = ma */
+      vec3 acceleration;
+      glm_vec3_scale (gravity_force, 1.0 / s->mass, acceleration);
+
+      vec3 velocity;
+      glm_vec3_add (acceleration, s->velocity, velocity);
+
+      glm_vec3_copy (velocity, s->velocity);
+
+      glm_vec3_muladds (velocity, it->delta_time, t->position);
     }
 
   TracyCZoneEnd (ctx);
@@ -58,13 +79,14 @@ spin (ecs_iter_t *it)
 
 static debug_draw_index_t
 make_vertex (debug_draw_list_t *ddl, transform_component_t *transform,
-             color_component_t *color, float xoff, float yoff)
+             color_component_t *color, float xoff, float yoff, float zoff)
 {
   float x = transform->position[0] + xoff;
   float y = transform->position[1] + yoff;
+  float z = transform->position[2] + zoff;
 
   debug_draw_vertex_t vertex = {
-    .position = { x, y, 0.0 },
+    .position = { x, y, z },
     .color = { color->color[0], color->color[1], color->color[2] },
   };
 
@@ -86,13 +108,19 @@ draw (ecs_iter_t *it)
       color_component_t *c = &cs[i];
 
       float r = 0.01;
-      debug_draw_index_t v1 = make_vertex (ddl, t, c, -r, -r);
-      debug_draw_index_t v2 = make_vertex (ddl, t, c, -r, r);
-      debug_draw_index_t v3 = make_vertex (ddl, t, c, r, -r);
-      debug_draw_index_t v4 = make_vertex (ddl, t, c, r, r);
+      debug_draw_index_t v1, v2;
 
-      debug_draw_list_line (ddl, v1, v4);
-      debug_draw_list_line (ddl, v2, v3);
+      v1 = make_vertex (ddl, t, c, r, 0.0, 0.0);
+      v2 = make_vertex (ddl, t, c, -r, 0.0, 0.0);
+      debug_draw_list_line (ddl, v1, v2);
+
+      /*v1 = make_vertex (ddl, t, c, 0.0, r, 0.0);
+      v2 = make_vertex (ddl, t, c, 0.0, -r, 0.0);
+      debug_draw_list_line (ddl, v1, v2);
+
+      v1 = make_vertex (ddl, t, c, 0.0, 0.0, r);
+      v2 = make_vertex (ddl, t, c, 0.0, 0.0, -r);
+      debug_draw_list_line (ddl, v1, v2);*/
     }
 
   TracyCZoneEnd (ctx);
@@ -104,19 +132,58 @@ norm_rand ()
   return ((float)rand ()) / RAND_MAX;
 }
 
-static void
-randomize_transform (transform_component_t *t)
+static float
+snorm_rand ()
 {
-  t->position[0] = (norm_rand () * 2.0 - 1.0) * 0.9;
-  t->position[1] = (norm_rand () * 2.0 - 1.0) * 0.9;
+  return norm_rand () * 2.0 - 1.0;
 }
 
 static void
-randomize_spin (spin_component_t *s)
+randomize_star (transform_component_t *t, star_component_t *s,
+                color_component_t *c)
 {
-  s->radius = norm_rand () * 0.9 + 0.05;
-  s->speed = norm_rand () * 4.0 - 2.0;
-  s->speed = s->speed / (s->radius + 1.0);
+  float radius = 5.0;
+  float offset = radius / 2.0;
+  float repel = 3.0;
+  t->position[0] = (norm_rand () * radius) - offset;
+  t->position[1] = (norm_rand () * radius) - offset;
+  t->position[2] = (norm_rand () * radius) - offset;
+
+  vec3 sign;
+  glm_vec3_sign (t->position, sign);
+  glm_vec3_scale (sign, repel, sign);
+  glm_vec3_add (sign, t->position, t->position);
+
+  s->mass = norm_rand () * 1000.0 + 400.0;
+
+  float velocity = 1000.0 / s->mass;
+  s->velocity[0] = snorm_rand ();
+  s->velocity[1] = snorm_rand ();
+  s->velocity[2] = snorm_rand ();
+
+  vec3 orbit_dir;
+  glm_vec3_sub (BLACK_HOLE_POSITION, t->position, orbit_dir);
+  glm_vec3_cross (orbit_dir, s->velocity, s->velocity);
+  glm_vec3_normalize (s->velocity);
+  glm_vec3_scale (s->velocity, velocity, s->velocity);
+
+  /* rainbow */
+  /*float h = norm_rand ();
+  float s = 1.0;
+  float v = 1.0;
+
+  hsv_to_rgb (c->color, h, s, v);*/
+
+  /* white */
+  /*glm_vec3_zero (c->color);
+  glm_vec3_adds (c->color, 1.0, c->color);*/
+
+  /* naive mock blackbody radiation */
+  float temperature = norm_rand ();
+
+  c->color[0] = (temperature + 8.0) / (temperature * 10.0 + 1.0);
+  c->color[1] = pow (temperature, 2.0);
+  c->color[2] = pow (temperature, 6.0);
 }
 
 static void
@@ -159,11 +226,6 @@ hsv_to_rgb (float rgb[3], float h, float s, float v)
 static void
 randomize_color (color_component_t *c)
 {
-  float h = norm_rand ();
-  float s = 1.0;
-  float v = 1.0;
-
-  hsv_to_rgb (c->color, h, s, v);
 }
 
 int
@@ -181,9 +243,9 @@ world_new (world_t **new_w, debug_draw_list_t *ddl)
   };
 
   ecs_component_desc_t s_desc = {
-    .entity.name = "Spin",
-    .size = sizeof (spin_component_t),
-    .alignment = ECS_ALIGNOF (spin_component_t),
+    .entity.name = "Star",
+    .size = sizeof (star_component_t),
+    .alignment = ECS_ALIGNOF (star_component_t),
   };
 
   ecs_component_desc_t c_desc = {
@@ -196,21 +258,24 @@ world_new (world_t **new_w, debug_draw_list_t *ddl)
   ecs_entity_t s_c = ecs_component_init (w->ecs, &s_desc);
   ecs_entity_t c_c = ecs_component_init (w->ecs, &c_desc);
 
-  for (int i = 0; i < 1000; i++)
+  for (int i = 0; i < 100000; i++)
     {
       ecs_entity_t e = ecs_new_id (w->ecs);
-      randomize_transform (ecs_get_mut_w_id (w->ecs, e, t_c, NULL));
-      randomize_spin (ecs_get_mut_w_id (w->ecs, e, s_c, NULL));
-      randomize_color (ecs_get_mut_w_id (w->ecs, e, c_c, NULL));
+
+      transform_component_t *t = ecs_get_mut_w_id (w->ecs, e, t_c, NULL);
+      star_component_t *s = ecs_get_mut_w_id (w->ecs, e, s_c, NULL);
+      color_component_t *c = ecs_get_mut_w_id (w->ecs, e, c_c, NULL);
+
+      randomize_star (t, s, c);
     }
 
   ecs_system_desc_t spin_desc = {
     .entity = (ecs_entity_desc_t){
-      .name = "spin",
+      .name = "orbit",
       .add = EcsOnUpdate,
     },
-    .query.filter.expr = "Transform, Spin",
-    .callback = spin,
+    .query.filter.expr = "Transform, Star",
+    .callback = orbit,
   };
 
   ecs_system_init (w->ecs, &spin_desc);
