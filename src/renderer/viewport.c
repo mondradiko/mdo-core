@@ -7,6 +7,7 @@
 #include "renderer/render_phases.h"
 
 /* TODO(marceline-cramer): custom logging */
+#include <cglm/mat4.h>
 #include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
@@ -247,6 +248,18 @@ viewport_delete (viewport_t *vp)
     vkDestroySemaphore (vp->vkd, vp->on_image_acquire[i], NULL);
 
   free (vp);
+}
+
+void
+viewport_write_uniform (viewport_t *vp, viewport_uniform_t *ubo)
+{
+  float aspect = ((float)vp->width) / vp->height;
+  glm_perspective (90.0, aspect, 0.1, 1000.0, ubo->projection_mat);
+
+  vec3 eye = { 10.0, 10.0, 10.0 };
+  vec3 center = { 0.0, 0.0, 0.0 };
+  vec3 up = { 0.0, 1.0, 0.0 };
+  glm_lookat (eye, center, up, ubo->view_mat);
 }
 
 int

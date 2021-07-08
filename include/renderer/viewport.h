@@ -7,6 +7,8 @@
 
 #include <vulkan/vulkan_core.h> /* for VkSurfaceKHR, VkSwapchainKHR */
 
+#include "renderer/viewport_uniform.h"
+
 /** @typedef viewport_t
  */
 typedef struct viewport_s viewport_t;
@@ -41,6 +43,10 @@ int viewport_new (viewport_t **, VkRenderPass, const struct viewport_config *);
 /** @function viewport_delete
  */
 void viewport_delete (viewport_t *);
+
+/** @function viewport_write_uniform
+ */
+void viewport_write_uniform (viewport_t *, viewport_uniform_t *);
 
 /** @function viewport_acquire
  * @param Non-zero if the swapchain has been acquired.
