@@ -31,10 +31,15 @@ struct debug_pass_s
 static int
 create_pipeline_layout (debug_pass_t *dbp)
 {
+  VkDescriptorSetLayout layouts[1];
+
+  layouts[0] = renderer_get_viewport_layout (dbp->ren);
+
   VkPipelineLayoutCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
     .flags = 0,
-    .setLayoutCount = 0,
+    .setLayoutCount = 1,
+    .pSetLayouts = layouts,
   };
 
   if (vkCreatePipelineLayout (dbp->vkd, &ci, NULL, &dbp->pipeline_layout)
@@ -118,8 +123,8 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
     .topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
   };
 
-  VkViewport viewport = {0};
-  VkRect2D scissor = {0};
+  VkViewport viewport = { 0 };
+  VkRect2D scissor = { 0 };
 
   VkPipelineViewportStateCreateInfo viewport_state = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -297,6 +302,10 @@ void
 debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
                    struct debug_frame_data *frame)
 {
+  vkCmdBindDescriptorSets (ctx->cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                           dbp->pipeline_layout, 0, 1, &ctx->viewport_set, 0,
+                           NULL);
+
   frame->vertex_num = debug_draw_list_vertex_num (dbp->ddl);
   frame->index_num = debug_draw_list_index_num (dbp->ddl);
 
