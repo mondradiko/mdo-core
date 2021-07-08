@@ -5,6 +5,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "gpu/gpu_vector.h"
 #include "renderer/debug/debug_frame_data.h"
 
 struct frame_data
@@ -13,6 +14,9 @@ struct frame_data
   VkCommandPool command_pool;
   VkSemaphore on_finished;
   VkFence is_in_flight;
+
+  /* global GPU data */
+  gpu_vector_t *viewport_buf;
 
   /* descriptors */
   VkDescriptorPool descriptor_pool;
