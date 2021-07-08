@@ -15,6 +15,7 @@
 #include "renderer/debug/debug_pass.h"
 #include "renderer/frame_data.h"
 #include "renderer/render_phases.h"
+#include "renderer/viewport_uniform.h"
 
 #define MAX_CAMERA_NUM 1024
 #define MAX_VIEWPORT_NUM (MAX_CAMERA_NUM * MAX_VIEWPORTS_PER_CAMERA)
@@ -66,6 +67,7 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
   frame->command_pool = VK_NULL_HANDLE;
   frame->on_finished = VK_NULL_HANDLE;
   frame->is_in_flight = VK_NULL_HANDLE;
+  frame->viewport_buf = NULL;
   frame->descriptor_pool = VK_NULL_HANDLE;
 
   VkCommandPoolCreateInfo cp_ci = {
@@ -103,6 +105,13 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
       return 1;
     }
 
+  VkBufferUsageFlags viewport_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  if (gpu_vector_new (&frame->viewport_buf, ren->gpu, viewport_usage))
+    {
+      fprintf (stderr, "failed to create viewport buffer\n");
+      return 1;
+    }
+
   VkDescriptorPoolSize pool_sizes[1];
 
   pool_sizes[0] = (VkDescriptorPoolSize){
@@ -132,6 +141,9 @@ frame_data_cleanup (renderer_t *ren, struct frame_data *frame)
 {
   if (frame->descriptor_pool)
     vkDestroyDescriptorPool (ren->vkd, frame->descriptor_pool, NULL);
+
+  if (frame->viewport_buf)
+    gpu_vector_delete (frame->viewport_buf);
 
   if (frame->command_pool)
     vkDestroyCommandPool (ren->vkd, frame->command_pool, NULL);
@@ -273,6 +285,42 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
   /* cull out unacquired viewports */
   viewport_num = acquired_num;
 
+  viewport_uniform_t viewport_uniforms[MAX_VIEWPORT_NUM];
+  for (int i = 0; i < viewport_num; i++)
+    {
+      viewport_write_uniform (viewports[i], &viewport_uniforms[i]);
+    }
+
+  gpu_vector_write (frame->viewport_buf, viewport_uniforms, viewport_num,
+                    sizeof (viewport_uniform_t));
+
+  VkDescriptorSetAllocateInfo alloc_info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    .descriptorPool = frame->descriptor_pool,
+    .descriptorSetCount = 1,
+    .pSetLayouts = &ren->viewport_layout,
+  };
+
+  vkAllocateDescriptorSets (ren->vkd, &alloc_info, &frame->viewport_set);
+
+  VkDescriptorBufferInfo vp_buf = {
+    .buffer = gpu_vector_get (frame->viewport_buf),
+    .offset = 0,
+    /*.range = gpu_vector_size (frame->viewport_buf),*/
+    .range = sizeof (viewport_uniform_t),
+  };
+
+  VkWriteDescriptorSet write_info = {
+    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    .dstSet = frame->viewport_set,
+    .dstBinding = 0,
+    .descriptorCount = 1,
+    .pBufferInfo = &vp_buf,
+  };
+
+  vkUpdateDescriptorSets (ren->vkd, 1, &write_info, 0, NULL);
+
   int swapchain_num = 0;
   VkSwapchainKHR swapchains[MAX_VIEWPORT_NUM];
 
@@ -305,14 +353,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 
   VkCommandBuffer cmd;
 
-  VkCommandBufferAllocateInfo alloc_info = {
+  VkCommandBufferAllocateInfo cmd_info = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
     .commandPool = frame->command_pool,
     .commandBufferCount = 1,
     .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
   };
 
-  vkAllocateCommandBuffers (ren->vkd, &alloc_info, &cmd);
+  vkAllocateCommandBuffers (ren->vkd, &cmd_info, &cmd);
 
   VkCommandBufferBeginInfo begin_info = {
     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -328,6 +376,8 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       const struct render_context ctx = {
         .cmd = cmd,
         .camera = viewport_cameras[i],
+        .viewport_index = i,
+        .viewport_set = frame->viewport_set,
       };
 
       debug_pass_render (ren->debug_pass, &ctx, &frame->debug);
