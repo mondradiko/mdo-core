@@ -14,13 +14,13 @@ endif()
 
 # Tracy
 if(TRACY_ENABLE)
-  add_library(tracy STATIC tracy/TracyClient.cpp)
+  add_library(tracy STATIC Tracy/TracyClient.cpp)
   target_compile_definitions(tracy PUBLIC TRACY_ENABLE)
 else()
   add_library(tracy INTERFACE)
 endif()
 
-target_include_directories(tracy INTERFACE tracy)
+target_include_directories(tracy INTERFACE Tracy)
 
 # FLECS
 add_library(flecs STATIC flecs/flecs.c)
