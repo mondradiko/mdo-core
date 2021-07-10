@@ -78,6 +78,9 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 {
   mdo_log_level_t severity;
 
+  const char* log_file = "vulkan_validation";
+  int log_line = callback_data->messageIdNumber;
+
   switch (message_severity)
     {
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
@@ -92,7 +95,7 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
       break;
     }
 
-  LOG_AT (severity, "vulkan validation:\n%s", callback_data->pMessage);
+  log_at (log_file, log_line, severity, "%s", callback_data->pMessage);
   return VK_FALSE;
 }
 
