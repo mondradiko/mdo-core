@@ -3,8 +3,6 @@
 
 #include "renderer/renderer.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
 
@@ -12,6 +10,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "gpu/gpu_device.h"
+#include "log.h"
 #include "renderer/debug/debug_pass.h"
 #include "renderer/frame_data.h"
 #include "renderer/render_phases.h"
@@ -47,7 +46,7 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
   if (vkCreateCommandPool (ren->vkd, &cp_ci, NULL, &frame->command_pool)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create command pool\n");
+      LOG_ERR ("failed to create command pool");
       return 1;
     }
 
@@ -58,7 +57,7 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
   if (vkCreateSemaphore (ren->vkd, &semaphore_ci, NULL, &frame->on_finished)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create semaphore\n");
+      LOG_ERR ("failed to create semaphore");
       return 1;
     }
 
@@ -70,7 +69,7 @@ frame_data_init (renderer_t *ren, struct frame_data *frame)
   if (vkCreateFence (ren->vkd, &fence_ci, NULL, &frame->is_in_flight)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create fence\n");
+      LOG_ERR ("failed to create fence");
       return 1;
     }
 
@@ -107,7 +106,7 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu, VkRenderPass rp)
 
   if (debug_pass_new (&ren->debug_pass, ren, rp))
     {
-      fprintf (stderr, "failed to create debug pass\n");
+      LOG_ERR ("failed to create debug pass");
       return 1;
     }
 
@@ -118,13 +117,13 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu, VkRenderPass rp)
 
       if (frame_data_init (ren, frame))
         {
-          fprintf (stderr, "failed to create frame data\n");
+          LOG_ERR ("failed to create frame data");
           return 1;
         }
 
       if (debug_frame_data_init (ren->debug_pass, &frame->debug))
         {
-          fprintf (stderr, "failed to create debug frame data\n");
+          LOG_ERR ("failed to create debug frame data");
           return 1;
         }
     }
@@ -166,7 +165,7 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 {
   if (camera_num > MAX_CAMERA_NUM)
     {
-      fprintf (stderr, "too many cameras (how did you even do that?)\n");
+      LOG_ERR ("too many cameras (how did you even do that?)");
       return;
     }
 
@@ -194,12 +193,14 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
     }
 
   int acquired_num = 0;
-  for (int i = 0; i < viewport_num; i++) {
-    if (viewport_acquire (viewports[i])) {
-      viewports[acquired_num] = viewports[i];
-      acquired_num++;
+  for (int i = 0; i < viewport_num; i++)
+    {
+      if (viewport_acquire (viewports[i]))
+        {
+          viewports[acquired_num] = viewports[i];
+          acquired_num++;
+        }
     }
-  }
 
   /* cull out unacquired viewports */
   viewport_num = acquired_num;
@@ -294,7 +295,7 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 
       if (vkQueuePresentKHR (ren->present_queue, &present_info) != VK_SUCCESS)
         {
-          fprintf (stderr, "failed to present to swapchains\n");
+          LOG_ERR ("failed to present to swapchains");
         }
     }
 
