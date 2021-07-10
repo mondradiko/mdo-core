@@ -4,11 +4,10 @@
 #include "gpu/gpu_device.h"
 
 #include "gpu/vk_config.h"
+#include "log.h"
 
 /* TODO(marceline-cramer): use mdo-allocator */
 #include <stdlib.h> /* for mem alloc */
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h>  /* for fprintf */
 #include <string.h> /* for strlen, memcpy */
 
 #include <vulkan/vulkan.h>
@@ -47,11 +46,11 @@ split_list (char *list, const char *array[MAX_EXTENSIONS])
         }
     }
 
-  fprintf (stdout, "num elements: %d\n%s\n", num_elements, list);
+  LOG_INF ("num elements: %d\n%s", num_elements, list);
 
   if (num_elements > MAX_EXTENSIONS)
     {
-      fprintf (stderr, "ERROR: number of elements in list exceeds maximum\n");
+      LOG_ERR ("number of elements in list exceeds maximum");
       return 0;
     }
 
@@ -77,7 +76,26 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
                 const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
                 void *userdata)
 {
-  fprintf (stderr, "vulkan validation: %s\n", callback_data->pMessage);
+  mdo_log_level_t severity;
+
+  const char* log_file = "vulkan_validation";
+  int log_line = callback_data->messageIdNumber;
+
+  switch (message_severity)
+    {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+      severity = MDO_LOG_INFO;
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+      severity = MDO_LOG_WARNING;
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+    default:
+      severity = MDO_LOG_ERROR;
+      break;
+    }
+
+  log_at (log_file, log_line, severity, "%s", callback_data->pMessage);
   return VK_FALSE;
 }
 
@@ -127,7 +145,7 @@ create_instance (gpu_device_t *gpu, const struct vk_config_t *config)
 
   if (vkCreateInstance (&ci, NULL, &gpu->instance) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create Vulkan instance\n");
+      LOG_ERR ("failed to create Vulkan instance");
       free (instance_ext_list);
       return -1;
     }
@@ -170,7 +188,7 @@ find_queue_families (gpu_device_t *gpu)
         }
     }
 
-  fprintf (stderr, "failed to find necessary queue families\n");
+  LOG_ERR ("failed to find necessary queue families");
   return -1;
 }
 
@@ -193,7 +211,7 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
 
   const char *layers[] = { "VK_LAYER_KHRONOS_validation" };
 
-  VkPhysicalDeviceFeatures device_features = {0};
+  VkPhysicalDeviceFeatures device_features = { 0 };
 
   VkDeviceCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -209,7 +227,7 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
   if (vkCreateDevice (gpu->physical_device, &ci, NULL, &gpu->device)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create Vulkan logical device");
+      LOG_ERR ("failed to create Vulkan logical device");
       free (device_ext_list);
       return -1;
     }
@@ -238,7 +256,7 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 
   if (gpu->physical_device == VK_NULL_HANDLE)
     {
-      fprintf (stderr, "failed to find Vulkan physical device\n");
+      LOG_ERR ("failed to find Vulkan physical device");
       return -1;
     }
 
@@ -267,7 +285,7 @@ VkInstance
 gpu_device_get_instance (gpu_device_t *gpu)
 {
   if (!gpu->instance)
-    fprintf (stderr, "WARN: getting null Vulkan instance\n");
+    LOG_WRN ("getting null Vulkan instance");
 
   return gpu->instance;
 }
@@ -276,7 +294,7 @@ VkPhysicalDevice
 gpu_device_get_physical (gpu_device_t *gpu)
 {
   if (!gpu->physical_device)
-    fprintf (stderr, "WARN: getting null Vulkan physical device\n");
+    LOG_WRN ("getting null Vulkan physical device");
 
   return gpu->physical_device;
 }
@@ -285,7 +303,7 @@ VkDevice
 gpu_device_get (gpu_device_t *gpu)
 {
   if (!gpu->device)
-    fprintf (stderr, "WARN: getting null Vulkan device\n");
+    LOG_WRN ("getting null Vulkan device");
 
   return gpu->device;
 }

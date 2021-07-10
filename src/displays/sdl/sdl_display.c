@@ -6,11 +6,11 @@
 #include "displays/display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
+#include "log.h"
 #include "renderer/camera.h"
 #include "renderer/viewport.h"
 
 /* TODO(marceline-cramer): replace with mdo_allocator */
-#include <stdio.h>  /* for fprintf */
 #include <stdlib.h> /* for mem alloc*/
 
 #include <SDL2/SDL.h>
@@ -40,8 +40,7 @@ create_window (sdl_display_t *dp)
 
   if (!dp->window)
     {
-      /* TODO(marceline-cramer): custom logging */
-      fprintf (stderr, "failed to create SDL window: %s\n", SDL_GetError ());
+      LOG_ERR ("failed to create SDL window: %s\n", SDL_GetError ());
       return -1;
     }
 
@@ -83,7 +82,7 @@ sdl_display_new (sdl_display_t **new_dp)
 {
   if (SDL_Init (SDL_INIT_VIDEO))
     {
-      fprintf (stderr, "failed to init SDL\n");
+      LOG_ERR ("failed to init SDL");
       return -1;
     }
 
@@ -139,8 +138,7 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
   VkSurfaceKHR *surface = &dp->surface;
   if (SDL_Vulkan_CreateSurface (window, instance, surface) != SDL_TRUE)
     {
-      fprintf (stderr, "failed to create window surface: %s\n",
-               SDL_GetError ());
+      LOG_ERR ("failed to create window surface: %s", SDL_GetError ());
       return 1;
     }
 
@@ -167,7 +165,7 @@ sdl_display_begin_session (sdl_display_t *dp, gpu_device_t *gpu)
 
   if (camera_new (&dp->camera, &cam_config))
     {
-      fprintf (stderr, "failed to create camera\n");
+      LOG_ERR ("failed to create camera");
       return 1;
     }
 

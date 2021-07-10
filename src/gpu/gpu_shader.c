@@ -3,11 +3,12 @@
 
 #include "gpu/gpu_shader.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf, file I/O */
+#include <stdio.h> /* for file I/O */
 /* TODO(marceline-cramer): custom mem alloc */
 #include <stdlib.h> /* for mem alloc */
 #include <vulkan/vulkan_core.h>
+
+#include "log.h"
 
 struct gpu_shader_s
 {
@@ -43,11 +44,13 @@ gpu_shader_delete (gpu_shader_t *shader)
 int
 gpu_shader_load_from_file (gpu_shader_t *shader, const char *filename)
 {
+  LOG_INF ("loading shader from file: %s", filename);
+
   FILE *f = fopen (filename, "rb");
 
   if (!f)
     {
-      fprintf (stderr, "failed to open shader file: %s\n", filename);
+      LOG_ERR ("failed to open shader file: %s", filename);
       return 1;
     }
 
@@ -67,7 +70,7 @@ gpu_shader_load_from_file (gpu_shader_t *shader, const char *filename)
   VkDevice vkd = gpu_device_get (shader->gpu);
   if (vkCreateShaderModule (vkd, &ci, NULL, &shader->module) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create shader module (file %s)\n", filename);
+      LOG_ERR ("failed to create shader module (file %s)", filename);
       free (code);
       fclose (f);
       return 1;
@@ -83,7 +86,7 @@ gpu_shader_get (gpu_shader_t *shader, VkPipelineShaderStageCreateInfo *ci)
 {
   if (!shader->module)
     {
-      fprintf (stderr, "attempted to get unloaded shader\n");
+      LOG_ERR ("attempted to get unloaded shader");
       return 1;
     }
 

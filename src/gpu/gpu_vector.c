@@ -2,10 +2,10 @@
  */
 
 #include "gpu/gpu_vector.h"
-#include "gpu/gpu_device.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
+#include "gpu/gpu_device.h"
+#include "log.h"
+
 /* TODO(marceline-cramer): custom allocation */
 #include <stdlib.h> /* for mem alloc */
 #include <string.h> /* for memcpy */
@@ -38,7 +38,7 @@ create_buffer (gpu_vector_t *vec)
 
   if (vkCreateBuffer (vec->vkd, &ci, NULL, &vec->buffer) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create GPU buffer\n");
+      LOG_ERR ("failed to create GPU buffer");
       return 1;
     }
 
@@ -60,7 +60,7 @@ find_memory_type (gpu_device_t *gpu, uint32_t type_filter,
         return i;
     }
 
-  fprintf (stderr, "failed to find suitable memory type\n");
+  LOG_ERR ("failed to find suitable memory type\n");
   return -1;
 }
 
@@ -78,7 +78,7 @@ allocate_memory (gpu_vector_t *vec)
 
   if (memory_type_index < 0)
     {
-      fprintf (stderr, "failed to find required memory type\n");
+      LOG_ERR ("failed to find required memory type\n");
       return 1;
     }
 
@@ -90,13 +90,13 @@ allocate_memory (gpu_vector_t *vec)
 
   if (vkAllocateMemory (vec->vkd, &ai, NULL, &vec->memory) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to allocate GPU memory\n");
+      LOG_ERR ("failed to allocate GPU memory");
       return 1;
     }
 
   if (vkBindBufferMemory (vec->vkd, vec->buffer, vec->memory, 0) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to bind buffer memory\n");
+      LOG_ERR ("failed to bind buffer memory");
       return 1;
     }
 
@@ -167,13 +167,13 @@ gpu_vector_reserve (gpu_vector_t *vec, size_t required_size)
 
       if (create_buffer (vec))
         {
-          fprintf (stderr, "failed to resize GPU buffer\n");
+          LOG_ERR ("failed to resize GPU buffer");
           return 1;
         }
 
       if (allocate_memory (vec))
         {
-          fprintf (stderr, "failed to resize GPU memory\n");
+          LOG_ERR ("failed to resize GPU memory");
           return 1;
         }
     }
@@ -191,14 +191,14 @@ gpu_vector_write (gpu_vector_t *vec, const void *src, size_t size, size_t num)
 
   if (gpu_vector_reserve (vec, copy_size))
     {
-      fprintf (stderr, "failed to reserve GPU memory for transfer\n");
+      LOG_ERR ("failed to reserve GPU memory for transfer");
       return 1;
     }
 
   void *dst = NULL;
   if (vkMapMemory (vec->vkd, vec->memory, 0, copy_size, 0, &dst) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to map GPU memory\n");
+      LOG_ERR ("failed to map GPU memory");
       return 1;
     }
 
@@ -213,7 +213,6 @@ VkBuffer
 gpu_vector_get (gpu_vector_t *vec)
 {
   if (!vec->buffer)
-    fprintf (stderr, "WARN: retrieving unitialized GPU buffer\n");
-
+    LOG_WRN ("retrieving unitialized GPU buffer");
   return vec->buffer;
 }
