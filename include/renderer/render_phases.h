@@ -11,4 +11,6 @@ struct render_context
 {
   VkCommandBuffer cmd;
   camera_t *camera;
+  int viewport_index;
+  VkDescriptorSet viewport_set;
 };
