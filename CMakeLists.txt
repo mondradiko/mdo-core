@@ -110,6 +110,7 @@ set(MDO_CORE_SRC
   src/renderer/renderer.c
   src/renderer/viewport.c
   src/world/world.c
+  src/log.c
 )
 
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
