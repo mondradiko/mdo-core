@@ -119,8 +119,8 @@ target_link_libraries(mdo-core
   mondradiko::vulkan
   mondradiko::libuv
   mondradiko::openxr
-  mondradiko::flecs
   mondradiko::cglm
+  flecs
   tracy
 )
 
