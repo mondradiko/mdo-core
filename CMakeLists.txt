@@ -22,6 +22,8 @@ include_directories(include)
 #  message(FATAL_ERROR "glslc not found.")
 #endif()
 
+add_subdirectory(lib)
+
 find_mondradiko_dependency(
   mondradiko::vulkan "Vulkan" NOCONFIG
   INSTALL "vulkan-sdk"
@@ -110,12 +112,6 @@ set(MDO_CORE_SRC
   src/world/world.c
 )
 
-if(TRACY_ENABLE)
-  list(APPEND MDO_CORE_SRC lib/Tracy/TracyClient.cpp)
-  include_directories(lib/Tracy/)
-  add_compile_definitions(TRACY_ENABLE)
-endif()
-
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
@@ -125,6 +121,7 @@ target_link_libraries(mdo-core
   mondradiko::openxr
   mondradiko::flecs
   mondradiko::cglm
+  tracy
 )
 
 add_executable(mdo-cli cli/main.c)
