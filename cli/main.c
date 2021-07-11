@@ -4,6 +4,7 @@
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
+#include "log.h"
 #include "renderer/renderer.h"
 #include "world/world.h"
 
@@ -25,7 +26,7 @@ init_cli_state (cli_state_t *cli)
 
   if (sdl_display_new (&cli->dp))
     {
-      fprintf (stderr, "failed to create SDL display\n");
+      LOG_ERR ("failed to create SDL display");
       return 1;
     }
 
@@ -34,26 +35,26 @@ init_cli_state (cli_state_t *cli)
 
   if (gpu_device_new (&cli->gpu, &vk_config))
     {
-      fprintf (stderr, "failed to create GPU device\n");
+      LOG_ERR ("failed to create GPU device");
       return 1;
     }
 
   if (sdl_display_begin_session (cli->dp, cli->gpu))
     {
-      fprintf (stderr, "failed to begin SDL session\n");
+      LOG_ERR ("failed to begin SDL session");
       return 1;
     }
 
   VkRenderPass rp = camera_get_render_pass (sdl_display_get_camera (cli->dp));
   if (renderer_new (&cli->ren, cli->gpu, rp))
     {
-      fprintf (stderr, "failed to create renderer\n");
+      LOG_ERR ("failed to create renderer");
       return 1;
     }
 
   if (world_new (&cli->w, renderer_get_debug_draw_list (cli->ren)))
     {
-      fprintf (stderr, "failed to create world\n");
+      LOG_ERR ("failed to create world");
       return 1;
     }
 
@@ -128,5 +129,6 @@ main ()
     }
 
   cleanup_cli_state (&cli);
+  LOG_MSG ("Mondradiko exited successfully.\nHave a nice day! :)");
   return 0;
 }
