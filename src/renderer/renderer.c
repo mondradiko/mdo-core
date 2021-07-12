@@ -165,6 +165,7 @@ renderer_new (renderer_t **new_ren, gpu_device_t *gpu, VkRenderPass rp)
   ren->viewport_layout = VK_NULL_HANDLE;
   ren->debug_pass = NULL;
   ren->frame_index = 0;
+  ren->frame_num = 0;
 
   int gfx_family = gpu_device_gfx_family (gpu);
   int queue_index = 0;
