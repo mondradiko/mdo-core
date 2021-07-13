@@ -110,6 +110,7 @@ set(MDO_CORE_SRC
   src/renderer/renderer.c
   src/renderer/viewport.c
   src/network/network_client.c
+  src/network/network_server.c
   src/world/world.c
   src/log.c
 )
