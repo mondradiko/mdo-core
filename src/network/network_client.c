@@ -50,6 +50,8 @@ int
 network_client_connect (network_client_t *client, const char *address,
                         int port)
 {
+  LOG_MSG ("connecting to: %s:%d", address, port);
+
   struct sockaddr_in dest;
   uv_ip4_addr (address, port, &dest);
 
