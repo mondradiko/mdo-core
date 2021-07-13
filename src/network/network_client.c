@@ -35,6 +35,7 @@ network_client_new (network_client_t **new_client)
 void
 network_client_delete (network_client_t *client)
 {
+  uv_close ((uv_handle_t *)&client->socket, NULL);
   uv_loop_close (&client->loop);
 
   free (client);
@@ -63,7 +64,11 @@ network_client_connect (network_client_t *client, const char *address,
   uv_tcp_connect (&client->connect, &client->socket,
                   (const struct sockaddr *)&dest, on_connect);
 
-  uv_run (&client->loop, UV_RUN_ONCE);
-
   return 0;
+}
+
+void
+network_client_update (network_client_t *client)
+{
+  uv_run (&client->loop, UV_RUN_NOWAIT);
 }

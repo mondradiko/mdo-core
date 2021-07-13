@@ -18,3 +18,7 @@ void network_client_delete (network_client_t *);
 /** @function network_client_connect
  */
 int network_client_connect (network_client_t *, const char *, int);
+
+/** @function network_client_update
+ */
+void network_client_update (network_client_t *);
