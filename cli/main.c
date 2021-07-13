@@ -1,5 +1,7 @@
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <vulkan/vulkan_core.h>
 
 #include "displays/display.h"
 #include "displays/sdl/sdl_display.h"
@@ -7,6 +9,7 @@
 #include "gpu/vk_config.h"
 #include "log.h"
 #include "network/network_client.h"
+#include "network/network_server.h"
 #include "renderer/renderer.h"
 #include "world/world.h"
 
@@ -25,6 +28,7 @@ typedef struct cli_state_s
   union
   {
     network_client_t *client;
+    network_server_t *server;
   } network;
 } cli_state_t;
 
@@ -72,6 +76,8 @@ init_cli_state (cli_state_t *cli)
 
   if (cli->is_client)
     cli->network.client = NULL;
+  else
+    cli->network.server = NULL;
 }
 
 int
@@ -132,8 +138,11 @@ create_cli_objects (cli_state_t *cli)
     }
   else
     {
-      LOG_ERR ("network server is not implemented yet");
-      return 1;
+      if (network_server_new (&cli->network.server))
+        {
+          LOG_ERR ("failed to create network server");
+          return 1;
+        }
     }
 
   return 0;
@@ -146,6 +155,11 @@ cleanup_cli_state (cli_state_t *cli)
     {
       if (cli->network.client)
         network_client_delete (cli->network.client);
+    }
+  else
+    {
+      if (cli->network.server)
+        network_server_delete (cli->network.server);
     }
 
   if (cli->w)
@@ -162,6 +176,15 @@ cleanup_cli_state (cli_state_t *cli)
 
   if (cli->gpu)
     gpu_device_delete (cli->gpu);
+}
+
+static int g_interrupted = 0;
+
+void
+signal_handler (int signum)
+{
+  LOG_MSG ("interrupt signal %d received", signum);
+  g_interrupted = 1;
 }
 
 static void
@@ -198,11 +221,17 @@ main (int argc, const char *argv[])
   if (result)
     return result;
 
-  if (!cli.is_headless)
+  if (signal (SIGTERM, signal_handler) == SIG_ERR)
+    LOG_WRN ("can't catch SIGTERM");
+
+  if (signal (SIGINT, signal_handler) == SIG_ERR)
+    LOG_WRN ("can't catch SIGINT");
+
+  struct display_poll_t poll;
+  poll.should_exit = 0;
+  while (!poll.should_exit && !g_interrupted)
     {
-      struct display_poll_t poll;
-      poll.should_exit = 0;
-      while (!poll.should_exit)
+      if (!cli.is_headless)
         {
           sdl_display_poll (cli.dp, &poll);
 
@@ -217,6 +246,15 @@ main (int argc, const char *argv[])
               temporary_debug_draw (renderer_get_debug_draw_list (cli.ren));
               renderer_render_frame (cli.ren, &camera, 1);
             }
+        }
+
+      if (cli.is_client)
+        {
+          network_client_update (cli.network.client);
+        }
+      else
+        {
+          network_server_update (cli.network.server);
         }
     }
 
