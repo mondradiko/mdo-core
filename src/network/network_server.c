@@ -1,14 +1,12 @@
 /** @file network_server.h
  */
-
-
 /* TODO(marceline-cramer): custom logging check out mdo-log*/
 #include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): custom allocation */
 #include <stdlib.h> /* for mem alloc */
 #include <string.h> /* for memcpy */
-#include <netinet/in.h>
 
+#include <sys/socket.h>
 #include <network_server.h>
 #include <uv.h>
 
@@ -63,22 +61,15 @@ void close_connection(){
   free(buf->base);
 }
 
-int main() {
-    loop = uv_default_loop();
-    uv_tcp_t server;
-    uv_tcp_init(loop, &server);
+   /*
+   Sasori's various notes:
+         statement on the use of sockaddr_in, from libuv doc:
+            You can see the utility function uv_ip4_addr being used to convert from a human readable IP address, 
+            [it is then] port paired to the sockaddr_in structure [which is] required by the BSD socket APIs; 
+            The reverse can be obtained using uv_ip4_name.
+    */
 
-    struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&client_addr;
-    struct in_addr ipAddr = pV4Addr->sin_addr;
-
-    char str[INET_ADDRSTRLEN];
-    inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN );
-
-    //get user's ipv4 addr
-    printf("User IP address is: %s\n", inet_ntoa(ipAddr)); //client_addr.sin_addr));
-    printf("Port is: %d\n", (int) ntohs(pV4Addr.sin_port)); //client_addr.sin_port));
-
-    //pass users addr
+    //pass users addr for debug
     //uv_ip4_addr("0.0.0.0", DEFAULT_PORT, &addr);
 
     /* IPv6 Func
@@ -89,6 +80,18 @@ int main() {
         char str[INET6_ADDRSTRLEN];
         inet_ntop( AF_INET6, &ipAddr, str, INET6_ADDRSTRLEN );
     */
+   
+int main() {
+    loop = uv_default_loop();
+    uv_tcp_t server;
+    uv_tcp_init(loop, &server);
+
+    struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&client_addr;
+    struct in_addr ipAddr = pV4Addr->sin_addr;
+
+    //get user's ipv4 addr
+    printf("User IP address is: %s\n", inet_ntoa(ipAddr)); //client_addr.sin_addr));
+    printf("Port is: %d\n", (int) ntohs(pV4Addr.sin_port)); //client_addr.sin_port));
 
     uv_ip4_addr(ipAddr, pV4Addr.sin_port, &pV4Addr);
     uv_tcp_bind(&server, (const struct sockaddr*)&pV4Addr, 0);
