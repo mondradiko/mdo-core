@@ -1,6 +1,6 @@
 Outlined below is a detailed exploration of building the Mondradiko toolchain on different platforms:
 
-# Win32 (w/ vcpkg)
+# Win64 (w/ vcpkg)
 
 You need to run the "x64 Native Tools Command Prompt," remove your build directory, and configure cmake with that specific 
 command prompt and a clean build directory, that way the proper windows compiler ecosystem gets used by vcpkg.
@@ -9,14 +9,14 @@ What's happening, in instances where vcpkg bootstraps but fails to run, is that 
 failing to install the proper dependencies because of compiler issues; if the cmake commandline tool isn't available with 
 that prompt, you can install it with Chocolatey.
 
-# Win32 (w/ POSIX Layer)
+# Win64 (w/ POSIX Layer)
 
 Generally, install vcpkg, and cmake to your favorite application for this purpose(cygwin, mingw64, WSL-Ubuntu). Clone the mdo-core
 directory to your home folder, cd into the folder and use cmake -s home/(src) -b home/(src)/build. Be sure to set USE_LAZY_VCPKG to
 TRUE before building otherwise you will need each library installed locally (though this boils down to trivial apt-get and install 
 calls if you neglect the use of vcpkg in such an environment)
 
-# Win32 (w/o vcpkg, POSIX Layer AKA Manually w/ CMake)
+# Win64 (w/o vcpkg, POSIX Layer AKA Manually w/ CMake)
 
 **Before you start: Install the VulkanSDK.**
 
