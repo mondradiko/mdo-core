@@ -93,7 +93,14 @@ Build the Solution, be sure to create a final folder in the location of mdo-cli.
 you have manually built the Mondradiko Toolchain on Win32!
 
 # x86_x64 (Ubuntu)
-TBA (cmake)
+Download [Ninja]("https://github.com/ninja-build/ninja/releases")
+in addition, have the git cli also installed (sudo apt-get git)
+
+Clone the mdo-core Directory (git clone -v "source url")
+cd into the mdo-core folder
+run ninja
+cd into bin all the source files should build correctly
+run mdo-cli
 
 # i386 (ARMv7/v8)
-TBA (cmake)
+TBA (cmake, clang?)
