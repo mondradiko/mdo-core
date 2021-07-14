@@ -100,9 +100,9 @@ Correct:
 ```c
 if (my_function (params))
   {
-	  LOG_ERR ("an error occurred!");
-		return 1;
-	}
+    LOG_ERR ("an error occurred!");
+    return 1;
+  }
 
 LOG_DBG ("no error occurred");
 return 0;
