@@ -87,9 +87,9 @@ Incorrect:
 ```c
 if (!my_function (params))
   {
-	  LOG_ERR ("a false-positive error occurred!");
-		return 0;
-	}
+    LOG_ERR ("a false-positive error occurred!");
+    return 0;
+  }
 
 LOG_DBG ("an error occurred but we didn't catch it...");
 return 1;
@@ -138,8 +138,8 @@ The contents of the object structure are defined in a source file:
 struct example_object_s
 {
   int member1;
-	float member2;
-	example_object_t *another_object;
+  float member2;
+  example_object_t *another_object;
 };
 ```
 
@@ -186,9 +186,9 @@ Usage:
 example_object_t *my_object;
 if (example_object_new (&my_object))
   {
-	  LOG_ERR ("failed to create example object");
-		return 1;
-	}
+    LOG_ERR ("failed to create example object");
+    return 1;
+  }
 ```
 
 ### Object Destructor
