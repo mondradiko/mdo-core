@@ -97,7 +97,7 @@ target_link_libraries(mdo-core
   ${LIBUV_LIBRARIES}
   ${Vulkan_LIBRARIES}
   ${SDL2_LIBRARIES}
-  #OpenXR::openxr_loader
+  OpenXR::openxr_loader
   flecs
   cglm
   tracy
