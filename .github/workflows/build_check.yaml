@@ -38,7 +38,8 @@ jobs:
 
       - name: apt
         if: runner.os == 'Linux'
-        run: sudo apt install libwayland-dev libxrandr-dev
+        run: sudo apt install \
+          libuv1-dev libvulkan-dev libopenxr-dev libsdl2-dev
 
       - name: cached vcpkg runtime
         if: runner.os == 'Linux'
