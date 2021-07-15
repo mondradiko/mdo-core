@@ -31,8 +31,7 @@ jobs:
           path: 'OpenXR-SDK'
 
       - uses: mondradiko/gha-setup-ninja@v3
-
-      - name: Configure OpenXR SDK (Linux)
+      - name: Install OpenXR SDK (Linux)
         working-directory: 'OpenXR-SDK'
         run: |
           mkdir build
@@ -58,10 +57,11 @@ jobs:
         if: runner.os == 'Windows'
         uses: mondradiko/gha-setup-vsdevenv@v3
 
-      - name: configure
+      - uses: mondradiko/gha-setup-ninja@v3
+      - name: Configure
         run: |
           mkdir build
-          cd build
+          pushd build
           cmake -GNinja -DTRACY_ENABLE=ON ..
 
       - name: compile
