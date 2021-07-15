@@ -27,8 +27,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          submodules: 'true'
+
+      - uses: actions/checkout@v2
+        with:
           repository: 'KhronosGroup/OpenXR-SDK'
           path: 'OpenXR-SDK'
+
+      - name: setup VsDev environment
+        if: runner.os == 'Windows'
+        uses: mondradiko/gha-setup-vsdevenv@v3
 
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Install OpenXR SDK (Linux)
@@ -48,14 +56,6 @@ jobs:
           sudo apt install \
             libglvnd-dev libxrandr-dev libwayland-dev \
             libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
-
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
-      - name: setup VsDev environment
-        if: runner.os == 'Windows'
-        uses: mondradiko/gha-setup-vsdevenv@v3
 
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Configure
