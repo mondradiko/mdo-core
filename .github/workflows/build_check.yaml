@@ -42,7 +42,6 @@ jobs:
           ninja
           sudo cmake --install .
           popd
-          popd
 
       - uses: actions/checkout@v2
         with:
