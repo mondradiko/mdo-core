@@ -4,6 +4,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "displays/display.h"
+#include "displays/openxr/openxr_display.h"
 #include "displays/sdl/sdl_display.h"
 #include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
@@ -13,14 +14,26 @@
 #include "renderer/renderer.h"
 #include "world/world.h"
 
+enum display_impl_t
+{
+  HEADLESS_DISPLAY,
+  SDL_DISPLAY,
+  OPENXR_DISPLAY,
+};
+
 typedef struct cli_state_s
 {
   /* params */
-  int is_headless;
+  enum display_impl_t dp_impl;
   int is_client;
 
   /* objects */
-  sdl_display_t *dp;
+  union
+  {
+    sdl_display_t *sdl;
+    openxr_display_t *oxr;
+  } display;
+
   gpu_device_t *gpu;
   renderer_t *ren;
   world_t *w;
@@ -35,22 +48,26 @@ typedef struct cli_state_s
 void
 print_help (const char *argv0)
 {
-  fprintf (stderr, "Usage\n  %s [--headless] [--server]", argv0);
+  fprintf (stderr, "Usage\n  %s {--headless, --sdl} [--server]\n", argv0);
 }
 
 int
 parse_cli_args (cli_state_t *cli, int argc, const char *argv[])
 {
-  cli->is_headless = 0;
+  cli->dp_impl = OPENXR_DISPLAY;
   cli->is_client = 1;
 
   for (int i = 1; i < argc; i++)
     {
       const char *arg = argv[i];
 
-      if (strcmp (arg, "--headless") == 0)
+      if (strcmp (arg, "--sdl") == 0)
         {
-          cli->is_headless = 1;
+          cli->dp_impl = SDL_DISPLAY;
+        }
+      else if (strcmp (arg, "--headless") == 0)
+        {
+          cli->dp_impl = HEADLESS_DISPLAY;
         }
       else if (strcmp (arg, "--server") == 0)
         {
@@ -69,31 +86,51 @@ parse_cli_args (cli_state_t *cli, int argc, const char *argv[])
 void
 init_cli_state (cli_state_t *cli)
 {
-  cli->dp = NULL;
+  cli->display.oxr = NULL;
+  cli->display.sdl = NULL;
+
   cli->gpu = NULL;
   cli->ren = NULL;
   cli->w = NULL;
 
-  if (cli->is_client)
-    cli->network.client = NULL;
-  else
-    cli->network.server = NULL;
+  cli->network.client = NULL;
+  cli->network.server = NULL;
 }
 
 int
 create_cli_objects (cli_state_t *cli)
 {
-
-  if (!cli->is_headless)
+  if (cli->dp_impl != HEADLESS_DISPLAY)
     {
-      if (sdl_display_new (&cli->dp))
-        {
-          LOG_ERR ("failed to create SDL display");
-          return 1;
-        }
-
       struct vk_config_t vk_config;
-      sdl_display_vk_config (cli->dp, &vk_config);
+
+      switch (cli->dp_impl)
+        {
+        case HEADLESS_DISPLAY:
+        case OPENXR_DISPLAY:
+          {
+            if (openxr_display_new (&cli->display.oxr))
+              {
+                LOG_ERR ("failed to create OpenXR display");
+                return 1;
+              }
+
+            openxr_display_vk_config (cli->display.oxr, &vk_config);
+            break;
+          }
+
+        case SDL_DISPLAY:
+          {
+            if (sdl_display_new (&cli->display.sdl))
+              {
+                LOG_ERR ("failed to create SDL display");
+                return 1;
+              }
+
+            sdl_display_vk_config (cli->display.sdl, &vk_config);
+            break;
+          }
+        }
 
       if (gpu_device_new (&cli->gpu, &vk_config))
         {
@@ -101,14 +138,44 @@ create_cli_objects (cli_state_t *cli)
           return 1;
         }
 
-      if (sdl_display_begin_session (cli->dp, cli->gpu))
+      switch (cli->dp_impl)
         {
-          LOG_ERR ("failed to begin SDL session");
-          return 1;
+        case HEADLESS_DISPLAY:
+        case OPENXR_DISPLAY:
+          {
+            if (openxr_display_begin_session (cli->display.oxr, cli->gpu))
+              {
+                LOG_ERR ("failed to begin OpenXR session");
+                return 1;
+              }
+            break;
+          case SDL_DISPLAY:
+            {
+              if (sdl_display_begin_session (cli->display.sdl, cli->gpu))
+                {
+                  LOG_ERR ("failed to begin SDL session");
+                  return 1;
+                }
+
+              break;
+            }
+          }
         }
 
-      VkRenderPass rp
-          = camera_get_render_pass (sdl_display_get_camera (cli->dp));
+      camera_t *camera;
+      switch (cli->dp_impl)
+        {
+        case HEADLESS_DISPLAY:
+        case OPENXR_DISPLAY:
+          camera = openxr_display_get_camera (cli->display.oxr);
+          break;
+        case SDL_DISPLAY:
+          camera = sdl_display_get_camera (cli->display.sdl);
+          break;
+        }
+
+      VkRenderPass rp = camera_get_render_pass (camera);
+
       if (renderer_new (&cli->ren, cli->gpu, rp))
         {
           LOG_ERR ("failed to create renderer");
@@ -168,10 +235,20 @@ cleanup_cli_state (cli_state_t *cli)
   if (cli->ren)
     renderer_delete (cli->ren);
 
-  if (cli->dp)
+  switch (cli->dp_impl)
     {
-      sdl_display_end_session (cli->dp);
-      sdl_display_delete (cli->dp);
+    case HEADLESS_DISPLAY:
+      break;
+
+    case OPENXR_DISPLAY:
+      openxr_display_end_session (cli->display.oxr);
+      openxr_display_delete (cli->display.oxr);
+      break;
+
+    case SDL_DISPLAY:
+      sdl_display_end_session (cli->display.sdl);
+      sdl_display_delete (cli->display.sdl);
+      break;
     }
 
   if (cli->gpu)
@@ -231,9 +308,21 @@ main (int argc, const char *argv[])
   poll.should_exit = 0;
   while (!poll.should_exit && !g_interrupted)
     {
-      if (!cli.is_headless)
+      if (cli.dp_impl != HEADLESS_DISPLAY)
         {
-          sdl_display_poll (cli.dp, &poll);
+          camera_t *camera;
+          switch (cli.dp_impl)
+            {
+            case HEADLESS_DISPLAY:
+            case OPENXR_DISPLAY:
+              openxr_display_poll (cli.display.oxr, &poll);
+              camera = openxr_display_get_camera (cli.display.oxr);
+              break;
+            case SDL_DISPLAY:
+              sdl_display_poll (cli.display.sdl, &poll);
+              camera = sdl_display_get_camera (cli.display.sdl);
+              break;
+            }
 
           if (poll.should_run)
             {
@@ -242,7 +331,6 @@ main (int argc, const char *argv[])
 
           if (poll.should_render)
             {
-              camera_t *camera = sdl_display_camera (cli.dp);
               temporary_debug_draw (renderer_get_debug_draw_list (cli.ren));
               renderer_render_frame (cli.ren, &camera, 1);
             }
