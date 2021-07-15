@@ -40,7 +40,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install libuv1-dev libvulkan-dev libsdl2-dev
+          sudo apt install libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
 
       - name: cached vcpkg runtime
         if: runner.os == 'Linux'

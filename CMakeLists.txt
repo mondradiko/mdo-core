@@ -16,8 +16,11 @@ include(FindVulkan)
 if(NOT Vulkan_FOUND)
   message(FATAL_ERROR "Vulkan not found.")
 endif()
-if(NOT Vulkan_GLSLC_EXECUTABLE)
-  message(FATAL_ERROR "glslc not found.")
+
+find_program(GLSL_COMPILER glslc)
+if(NOT GLSL_COMPILER)
+  message(WARNING "glslc not found, using slower glslangValidator instead")
+  find_program(GLSL_COMPILER glslangValidator REQUIRED)
 endif()
 
 add_subdirectory(lib)
@@ -40,7 +43,7 @@ function(spirv_shader ret GLSL VAR)
 
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND Vulkan::glslc -O -o ${SPIRV} ${GLSL}
+    COMMAND ${GLSL_COMPILER} -O -o ${SPIRV} ${GLSL}
     DEPENDS ${GLSL}
   )
 
