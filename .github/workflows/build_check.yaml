@@ -39,16 +39,23 @@ jobs:
         uses: mondradiko/gha-setup-vsdevenv@v3
 
       - uses: mondradiko/gha-setup-ninja@v3
-      - name: Install OpenXR SDK
-        shell: bash
+      - name: Build OpenXR SDK
         working-directory: 'OpenXR-SDK'
         run: |
           mkdir build
           pushd build
           cmake -GNinja ..
           cmake --build .
-          sudo cmake --install .
-          popd
+
+      - name: Install OpenXR SDK (Linux)
+        if: runner.os == 'Linux'
+        working-directory: 'OpenXR-SDK/build'
+        run: sudo cmake --install .
+
+      - name: Install OpenXR SDK (Windows)
+        if: runner.os == 'Windows'
+        working-directory: 'OpenXR-SDK/build'
+        run: cmake --install .
 
       - name: apt
         if: runner.os == 'Linux'
