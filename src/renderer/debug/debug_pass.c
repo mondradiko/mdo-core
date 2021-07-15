@@ -5,10 +5,9 @@
 
 #include "gpu/gpu_device.h"
 #include "gpu/gpu_shader.h"
+#include "log.h"
 #include "renderer/debug/debug_draw.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): custom mem alloc */
 #include <stdlib.h> /* for mem alloc */
 #include <vulkan/vulkan_core.h>
@@ -31,16 +30,21 @@ struct debug_pass_s
 static int
 create_pipeline_layout (debug_pass_t *dbp)
 {
+  VkDescriptorSetLayout layouts[1];
+
+  layouts[0] = renderer_get_viewport_layout (dbp->ren);
+
   VkPipelineLayoutCreateInfo ci = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
     .flags = 0,
-    .setLayoutCount = 0,
+    .setLayoutCount = 1,
+    .pSetLayouts = layouts,
   };
 
   if (vkCreatePipelineLayout (dbp->vkd, &ci, NULL, &dbp->pipeline_layout)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create debug pipeline layout\n");
+      LOG_ERR ("failed to create debug pipeline layout");
       return 1;
     }
 
@@ -53,14 +57,14 @@ load_shaders (debug_pass_t *dbp)
   if (gpu_shader_new (&dbp->vertex_shader, dbp->gpu,
                       VK_SHADER_STAGE_VERTEX_BIT))
     {
-      fprintf (stderr, "failed to create vertex shader\n");
+      LOG_ERR ("failed to create vertex shader");
       return 1;
     }
 
   if (gpu_shader_new (&dbp->fragment_shader, dbp->gpu,
                       VK_SHADER_STAGE_FRAGMENT_BIT))
     {
-      fprintf (stderr, "failed to create fragment shader\n");
+      LOG_ERR ("failed to create fragment shader");
       return 1;
     }
 
@@ -118,8 +122,8 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
     .topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
   };
 
-  VkViewport viewport = {0};
-  VkRect2D scissor = {0};
+  VkViewport viewport = { 0 };
+  VkRect2D scissor = { 0 };
 
   VkPipelineViewportStateCreateInfo viewport_state = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -189,7 +193,7 @@ create_pipeline (debug_pass_t *dbp, VkRenderPass rp)
   if (vkCreateGraphicsPipelines (dbp->vkd, cache, 1, &ci, NULL, &dbp->pipeline)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create debug pipeline\n");
+      LOG_ERR ("failed to create debug pipeline");
       return 1;
     }
 
@@ -216,7 +220,7 @@ debug_pass_new (debug_pass_t **new_dbp, renderer_t *ren, VkRenderPass rp)
 
   if (debug_draw_list_new (&dbp->ddl))
     {
-      fprintf (stderr, "failed to create debug pass draw list\n");
+      LOG_ERR ("failed to create debug pass draw list");
       return 1;
     }
 
@@ -270,13 +274,13 @@ debug_frame_data_init (debug_pass_t *dbp, struct debug_frame_data *frame)
 
   if (gpu_vector_new (&frame->vertices, dbp->gpu, VERTEX_USAGE))
     {
-      fprintf (stderr, "failed to create vertex buffer\n");
+      LOG_ERR ("failed to create vertex buffer");
       return 1;
     }
 
   if (gpu_vector_new (&frame->indices, dbp->gpu, INDEX_USAGE))
     {
-      fprintf (stderr, "failed to create index buffer\n");
+      LOG_ERR ("failed to create index buffer");
       return 1;
     }
 
@@ -297,6 +301,10 @@ void
 debug_pass_render (debug_pass_t *dbp, const struct render_context *ctx,
                    struct debug_frame_data *frame)
 {
+  vkCmdBindDescriptorSets (ctx->cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                           dbp->pipeline_layout, 0, 1, &ctx->viewport_set, 0,
+                           NULL);
+
   frame->vertex_num = debug_draw_list_vertex_num (dbp->ddl);
   frame->index_num = debug_draw_list_index_num (dbp->ddl);
 

@@ -22,6 +22,8 @@ include_directories(include)
 #  message(FATAL_ERROR "glslc not found.")
 #endif()
 
+add_subdirectory(lib)
+
 find_mondradiko_dependency(
   mondradiko::vulkan "Vulkan" NOCONFIG
   INSTALL "vulkan-sdk"
@@ -39,6 +41,29 @@ find_mondradiko_dependency(
 find_mondradiko_dependency(
   mondradiko::wavm "WAVM" WAVM::libWAVM
   INSTALL "wavm"
+)
+
+find_mondradiko_dependency(
+  mondradiko::libuv "unofficial-libuv" unofficial::libuv::libuv
+  INSTALL "libuv"
+)
+
+find_mondradiko_dependency(
+  mondradiko::openxr "OpenXR"
+  INSTALL "openxr-loader"
+  OpenXR::headers
+  OpenXR::openxr_loader
+  OpenXR::openxr-all-supported
+)
+
+find_mondradiko_dependency(
+  mondradiko::flecs "flecs" flecs::flecs_static
+  INSTALL "flecs"
+)
+
+find_mondradiko_dependency(
+  mondradiko::cglm "cglm" cglm::cglm
+  INSTALL "cglm"
 )
 
 # shaders
@@ -89,13 +114,11 @@ set(MDO_CORE_SRC
   src/renderer/camera.c
   src/renderer/renderer.c
   src/renderer/viewport.c
+  src/network/network_client.c
+  src/network/network_server.c
+  src/world/world.c
+  src/log.c
 )
-
-if(TRACY_ENABLE)
-  list(APPEND MDO_CORE_SRC lib/Tracy/TracyClient.cpp)
-  include_directories(lib/Tracy/)
-  add_compile_definitions(TRACY_ENABLE)
-endif()
 
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
@@ -103,6 +126,11 @@ target_link_libraries(mdo-core
   mondradiko::sdl2
   mondradiko::vulkan
   mondradiko::wavm
+  mondradiko::libuv
+  mondradiko::openxr
+  mondradiko::cglm
+  flecs
+  tracy
 )
 
 add_executable(mdo-cli cli/main.c)

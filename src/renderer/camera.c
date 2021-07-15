@@ -3,11 +3,11 @@
 
 #include "renderer/camera.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
 #include <vulkan/vulkan_core.h>
+
+#include "log.h"
 
 struct camera_s
 {
@@ -62,7 +62,7 @@ create_render_pass (camera_t *cam)
 
   if (vkCreateRenderPass (cam->vkd, &ci, NULL, &cam->rp) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create render pass\n");
+      LOG_ERR ("failed to create render pass");
       return 1;
     }
 
@@ -74,7 +74,7 @@ camera_new (camera_t **new_cam, const struct camera_config *config)
 {
   if (config->viewport_num > MAX_VIEWPORTS_PER_CAMERA)
     {
-      fprintf (stderr, "too many viewports\n");
+      LOG_ERR ("too many viewports");
       return 1;
     }
 
@@ -95,7 +95,7 @@ camera_new (camera_t **new_cam, const struct camera_config *config)
       if (viewport_new (&cam->viewports[i], cam->rp,
                         &config->viewport_configs[i]))
         {
-          fprintf (stderr, "failed to create viewport\n");
+          LOG_ERR ("failed to create viewport");
           return 1;
         }
     }

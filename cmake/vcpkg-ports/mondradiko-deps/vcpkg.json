@@ -7,6 +7,10 @@
   "dependencies": [
     "vulkan-sdk",
     "wavm",
+    "libuv",
+    "openxr-loader",
+    "flecs",
+    "cglm",
     {
       "name": "sdl2",
       "features": [ "vulkan" ]

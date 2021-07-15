@@ -4,10 +4,10 @@
 #include "renderer/viewport.h"
 
 #include "gpu/gpu_device.h"
+#include "log.h"
 #include "renderer/render_phases.h"
 
-/* TODO(marceline-cramer): custom logging */
-#include <stdio.h> /* for fprintf */
+#include <cglm/mat4.h>
 /* TODO(marceline-cramer): mdo_allocator */
 #include <stdlib.h> /* for mem alloc */
 
@@ -43,7 +43,7 @@ struct viewport_s
 static int
 surface_init (viewport_t *vp, const struct viewport_config *config)
 {
-  fprintf (stderr, "creating surface-based viewport\n");
+  LOG_INF ("creating surface-based viewport");
 
   VkPhysicalDevice vkpd = gpu_device_get_physical (vp->gpu);
   int gfx_family = gpu_device_gfx_family (vp->gpu);
@@ -52,7 +52,7 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
   vkGetPhysicalDeviceSurfaceSupportKHR (vkpd, gfx_family, surface, &supported);
   if (supported != VK_TRUE)
     {
-      fprintf (stderr, "surface is unsupported on this queue family\n");
+      LOG_ERR ("surface is unsupported on this queue family");
       return 1;
     }
 
@@ -60,7 +60,7 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
   if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR (vkpd, surface, &caps)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to get surface capabilities\n");
+      LOG_ERR ("failed to get surface capabilities");
       return 1;
     }
 
@@ -97,7 +97,7 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
 
   if (vkCreateSwapchainKHR (vp->vkd, &ci, NULL, &vp->swapchain) != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to create swapchain\n");
+      LOG_ERR ("failed to create swapchain");
       return 1;
     }
 
@@ -106,7 +106,7 @@ surface_init (viewport_t *vp, const struct viewport_config *config)
   if (vkGetSwapchainImagesKHR (vp->vkd, vp->swapchain, &image_num, images)
       != VK_SUCCESS)
     {
-      fprintf (stderr, "failed to get swapchain images\n");
+      LOG_ERR ("failed to get swapchain images");
       return 1;
     }
 
@@ -145,7 +145,7 @@ create_images (viewport_t *vp, VkRenderPass rp)
                              &vp->images[i].image_view)
           != VK_SUCCESS)
         {
-          fprintf (stderr, "failed to create image view\n");
+          LOG_ERR ("failed to create image view");
           return 1;
         }
 
@@ -163,7 +163,7 @@ create_images (viewport_t *vp, VkRenderPass rp)
                                &vp->images[i].framebuffer)
           != VK_SUCCESS)
         {
-          fprintf (stderr, "failed to create framebuffer\n");
+          LOG_ERR ("failed to create framebuffer");
           return 1;
         }
     }
@@ -183,7 +183,7 @@ create_semaphores (viewport_t *vp)
       if (vkCreateSemaphore (vp->vkd, &ci, NULL, &vp->on_image_acquire[i])
           != VK_SUCCESS)
         {
-          fprintf (stderr, "failed to create image acquisition semaphore\n");
+          LOG_ERR ("failed to create image acquisition semaphore");
           return 1;
         }
     }
@@ -217,7 +217,7 @@ viewport_new (viewport_t **new_vp, VkRenderPass rp,
       }
     default:
       {
-        fprintf (stderr, "unrecognized viewport type\n");
+        LOG_ERR ("unrecognized viewport type");
         return 1;
       }
     }
@@ -249,6 +249,18 @@ viewport_delete (viewport_t *vp)
   free (vp);
 }
 
+void
+viewport_write_uniform (viewport_t *vp, viewport_uniform_t *ubo)
+{
+  float aspect = ((float)vp->width) / vp->height;
+  glm_perspective (90.0, aspect, 0.1, 1000.0, ubo->projection_mat);
+
+  vec3 eye = { 10.0, 10.0, 10.0 };
+  vec3 center = { 0.0, 0.0, 0.0 };
+  vec3 up = { 0.0, 1.0, 0.0 };
+  glm_lookat (eye, center, up, ubo->view_mat);
+}
+
 int
 viewport_acquire (viewport_t *vp)
 {
@@ -258,11 +270,17 @@ viewport_acquire (viewport_t *vp)
   VkSemaphore on_acquire = vp->on_image_acquire[vp->image_acquire_index];
 
   uint32_t image_index;
-  vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
-                         VK_NULL_HANDLE, &image_index);
+  VkResult result
+      = vkAcquireNextImageKHR (vp->vkd, vp->swapchain, UINT64_MAX, on_acquire,
+                               VK_NULL_HANDLE, &image_index);
+
+  if (result != VK_SUCCESS)
+    {
+      LOG_ERR ("failed to acquire swapchain image");
+      return 0;
+    }
 
   vp->image_index = image_index;
-
   return 1;
 }
 
