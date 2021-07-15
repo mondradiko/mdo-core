@@ -29,7 +29,10 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install ninja-build libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
+          sudo apt install \
+            ninja-build \
+            libxrandr-dev libwayland-dev \
+            libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
 
       - uses: actions/checkout@v2
         with:
