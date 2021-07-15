@@ -39,7 +39,8 @@ jobs:
         uses: mondradiko/gha-setup-vsdevenv@v3
 
       - uses: mondradiko/gha-setup-ninja@v3
-      - name: Install OpenXR SDK (Linux)
+      - name: Install OpenXR SDK
+        shell: bash
         working-directory: 'OpenXR-SDK'
         run: |
           mkdir build
