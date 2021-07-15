@@ -17,10 +17,13 @@ if(NOT Vulkan_FOUND)
   message(FATAL_ERROR "Vulkan not found.")
 endif()
 
-find_program(GLSL_COMPILER glslc)
-if(NOT GLSL_COMPILER)
+find_program(GLSL_COMPILER glslc NO_CACHE)
+if(GLSL_COMPILER) # glslc args
+  set(GLSL_ARGS "-O")
+else() # glslangValidator args
   message(WARNING "glslc not found, using slower glslangValidator instead")
-  find_program(GLSL_COMPILER glslangValidator REQUIRED)
+  find_program(GLSL_COMPILER glslangValidator NO_CACHE REQUIRED)
+  set(GLSL_ARGS "-V")
 endif()
 
 add_subdirectory(lib)
@@ -46,7 +49,7 @@ function(spirv_shader ret GLSL VAR)
 
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND ${GLSL_COMPILER} -O -o ${SPIRV} ${GLSL}
+    COMMAND ${GLSL_COMPILER} ${GLSL_ARGS} ${GLSL} -o ${SPIRV}
     DEPENDS ${GLSL}
   )
 
