@@ -47,7 +47,7 @@ jobs:
           pushd build
           cmake -GNinja ..
           cmake --build .
-          sudo cmake --install .
+          cmake --install .
           popd
 
       - name: apt
