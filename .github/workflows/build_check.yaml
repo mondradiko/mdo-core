@@ -38,8 +38,9 @@ jobs:
 
       - name: apt
         if: runner.os == 'Linux'
-        run: sudo apt install \
-          libuv1-dev libvulkan-dev libopenxr-dev libsdl2-dev
+        run: |
+          sudo apt update
+          sudo apt install libuv1-dev libvulkan-dev libopenxr-dev libsdl2-dev
 
       - name: cached vcpkg runtime
         if: runner.os == 'Linux'
