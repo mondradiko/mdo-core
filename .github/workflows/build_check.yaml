@@ -25,12 +25,27 @@ jobs:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
     steps:
+      - name: install ninja-build tool
+        uses: mondradiko/gha-setup-ninja@v3
+
+      - uses: actions/checkout@v2
+        with:
+          repository: 'https://github.com/KhronosGroup/OpenXR-SDK'
+          path: 'OpenXR-SDK'
+
+      - name: Build OpenXR SDK
+        working-directory: 'OpenXR-SDK'
+        run: |
+          mkdir build
+          pushd build
+          cmake -GNinja ..
+          ninja install
+          popd
+          popd
+
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
-
-      - name: install ninja-build tool
-        uses: mondradiko/gha-setup-ninja@v3
 
       - name: setup VsDev environment
         if: runner.os == 'Windows'
