@@ -25,33 +25,31 @@ jobs:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
     steps:
-      - name: apt
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt update
-          sudo apt install \
-            ninja-build \
-            libglvnd-dev libxrandr-dev libwayland-dev \
-            libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
-
       - uses: actions/checkout@v2
         with:
           repository: 'KhronosGroup/OpenXR-SDK'
           path: 'OpenXR-SDK'
+
+      - uses: mondradiko/gha-setup-ninja@v3
 
       - name: Configure OpenXR SDK (Linux)
         working-directory: 'OpenXR-SDK'
         run: |
           mkdir build
           pushd build
-          cmake -DPRESENTATION_BACKEND=xlib -DOpenGL_GL_PREFERENCE=GLVND -GNinja ..
-
-      - name: Build and Install OpenXR SDK
-        working-directory: 'OpenXR-SDK/build'
-        run: |
+          cmake -GNinja ..
           cmake --build .
           sudo cmake --install .
           popd
+
+      - name: apt
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install \
+            # ninja-build \
+            libglvnd-dev libxrandr-dev libwayland-dev \
+            libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
 
       - uses: actions/checkout@v2
         with:
