@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          repository: 'https://github.com/KhronosGroup/OpenXR-SDK'
+          repository: 'KhronosGroup/OpenXR-SDK'
           path: 'OpenXR-SDK'
 
       - name: Build OpenXR SDK
