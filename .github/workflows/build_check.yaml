@@ -17,9 +17,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-          #- os: windows-latest
-          #  cc: cl.exe
-          #  cxx: cl.exe
+          - os: windows-latest
+            cc: cl.exe
+            cxx: cl.exe
     runs-on: ${{ matrix.os }}
     env:
       CC: ${{ matrix.cc }}
