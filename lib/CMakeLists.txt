@@ -8,9 +8,9 @@ if(UNIX)
 endif()
 
 # CGLM
-#set(CGLM_SHARED OFF)
-#set(CGLM_STATIC ON)
-#add_subdirectory(cglm)
+set(CGLM_SHARED OFF)
+set(CGLM_STATIC ON)
+add_subdirectory(cglm)
 
 # Tracy
 if(TRACY_ENABLE)
