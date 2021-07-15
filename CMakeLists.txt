@@ -31,7 +31,7 @@ endif()
 
 pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
 
-find_package(OpenXR REQUIRED)
+# find_package(OpenXR REQUIRED)
 
 # shaders
 function(spirv_shader ret GLSL VAR)
@@ -89,7 +89,7 @@ target_link_libraries(mdo-core
   ${Vulkan_LIBRARIES}
   SDL2::SDL2
   SDL2::SDL2main
-  OpenXR::openxr_loader
+  #OpenXR::openxr_loader
   flecs
   cglm
   tracy
