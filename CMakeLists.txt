@@ -26,6 +26,9 @@ endif()
 add_subdirectory(lib)
 
 find_package(SDL2 REQUIRED)
+if(TARGET SDL2::SDL2)  # support targeted SDL2 distributions
+  set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main)
+endif()
 
 include(FindPkgConfig)
 if(NOT PKG_CONFIG_FOUND)
@@ -90,8 +93,7 @@ add_library(mdo-core SHARED ${MDO_CORE_SRC})
 target_link_libraries(mdo-core
   ${LIBUV_LIBRARIES}
   ${Vulkan_LIBRARIES}
-  SDL2::SDL2
-  SDL2::SDL2main
+  ${SDL2_LIBRARIES}
   #OpenXR::openxr_loader
   flecs
   cglm
