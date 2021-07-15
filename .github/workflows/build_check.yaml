@@ -65,6 +65,10 @@ jobs:
             libglvnd-dev libxrandr-dev libwayland-dev \
             libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
 
+      - name: Chocolatey
+        if: runner.os == 'Windows'
+        run: choco install vulkan-sdk
+
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Configure
         run: |
