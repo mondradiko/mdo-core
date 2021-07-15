@@ -40,7 +40,7 @@ endif()
 
 pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
 
-# find_package(OpenXR REQUIRED)
+find_package(OpenXR REQUIRED)
 
 # shaders
 function(spirv_shader ret GLSL VAR)
