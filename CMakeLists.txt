@@ -9,7 +9,7 @@ option(TRACY_ENABLE "Enable Tracy profiling.")
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   set(BUILD_SHARED_LIBS TRUE)
- endif()
+endif()
 
 include_directories(include)
 
@@ -101,6 +101,7 @@ endif()
 # main library
 set(MDO_CORE_SRC
   src/displays/sdl/sdl_display.c
+  src/displays/openxr/openxr_display.c
   src/gpu/gpu_device.c
   src/gpu/gpu_shader.c
   src/gpu/gpu_vector.c
@@ -118,15 +119,14 @@ set(MDO_CORE_SRC
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
+  mondradiko::openxr
   mondradiko::sdl2
   mondradiko::vulkan
   mondradiko::libuv
-  mondradiko::openxr
   mondradiko::cglm
-  flecs
   tracy
+  flecs
 )
 
 add_executable(mdo-cli cli/main.c)
 target_link_libraries(mdo-cli mdo-core)
-
