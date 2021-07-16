@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "gpu/gpu_vector.h"
 #include "renderer/debug/debug_frame_data.h"
 
