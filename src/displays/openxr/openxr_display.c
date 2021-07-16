@@ -12,10 +12,21 @@
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 
+#define DECLARE_XR_FN_PTR(name) PFN_##name ext_##name;
+#define LOAD_XR_FN_PTR(name)                                                  \
+  xrGetInstanceProcAddr (dp->instance, #name,                                 \
+                         (PFN_xrVoidFunction *)&dp->ext_##name)
+
 struct openxr_display_s
 {
   XrInstance instance;
   XrSystemId system_id;
+
+  /* loaded instance functions */
+  DECLARE_XR_FN_PTR (xrGetVulkanGraphicsRequirementsKHR);
+  DECLARE_XR_FN_PTR(xrGetVulkanInstanceExtensionsKHR);
+  DECLARE_XR_FN_PTR(xrGetVulkanGraphicsDeviceKHR);
+  DECLARE_XR_FN_PTR(xrGetVulkanDeviceExtensionsKHR);
 
   /* session info */
   gpu_device_t *gpu;
@@ -73,6 +84,15 @@ find_system (openxr_display_t *dp)
   return 0;
 }
 
+static void
+load_fn_ptrs(openxr_display_t *dp)
+{
+  LOAD_XR_FN_PTR(xrGetVulkanGraphicsRequirementsKHR);
+  LOAD_XR_FN_PTR(xrGetVulkanInstanceExtensionsKHR);
+  LOAD_XR_FN_PTR(xrGetVulkanGraphicsDeviceKHR);
+  LOAD_XR_FN_PTR(xrGetVulkanDeviceExtensionsKHR);
+}
+
 int
 openxr_display_new (openxr_display_t **new_dp)
 {
@@ -88,6 +108,8 @@ openxr_display_new (openxr_display_t **new_dp)
 
   if (find_system (dp))
     return 1;
+
+  load_fn_ptrs (dp);
 
   return 0;
 }
