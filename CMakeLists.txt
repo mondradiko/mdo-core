@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(mdo-core VERSION 0.0.0)
 
 # options
+option(COMPILE_SHADERS "Enable shader compilation." ON)
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
 if(MSVC)
@@ -22,8 +23,12 @@ if(GLSL_COMPILER) # glslc args
   set(GLSL_ARGS "-O")
 else() # glslangValidator args
   message(WARNING "glslc not found, using slower glslangValidator instead")
-  find_program(GLSL_COMPILER glslangValidator NO_CACHE REQUIRED)
+  find_program(GLSL_COMPILER glslangValidator NO_CACHE)
   set(GLSL_ARGS "-V")
+endif()
+
+if(COMPILE_SHADERS AND NOT GLSL_COMPILER)
+  message(FATAL_ERROR "Suitable shader compiler not found.")
 endif()
 
 add_subdirectory(lib)
@@ -71,8 +76,10 @@ set(SHADERS_SRC
   shaders/debug.vert
 )
 
-spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
-add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+if(COMPILE_SHADERS)
+  spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
+  add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
+endif()
 
 # main library
 set(MDO_CORE_SRC
