@@ -1,7 +1,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <vulkan/vulkan_core.h>
 
 #include "displays/display.h"
 #include "displays/openxr/openxr_display.h"

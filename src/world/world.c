@@ -9,7 +9,6 @@
 #include <TracyC.h>
 #include <cglm/vec3.h>
 #include <flecs.h>
-#include <flecs/modules/system.h>
 
 static const vec3 BLACK_HOLE_POSITION = { 0.0, 0.0, 0.0 };
 static const float BLACK_HOLE_MASS = 10000.0;

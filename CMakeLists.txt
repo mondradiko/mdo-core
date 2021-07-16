@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-include(cmake/prelude.cmake)
 project(mdo-core VERSION 0.0.0)
 
 # options
-option(COMPILE_SHADERS "Compile shaders in bulid tree.")
+option(COMPILE_SHADERS "Enable shader compilation." ON)
 option(TRACY_ENABLE "Enable Tracy profiling.")
 
 if(MSVC)
@@ -14,52 +13,32 @@ endif()
 include_directories(include)
 
 # dependencies
-#include(FindVulkan)
+include(FindVulkan)
 #if(NOT Vulkan_FOUND)
-# message(FATAL_ERROR "Vulkan not found.")
+#  message(FATAL_ERROR "Vulkan not found.")
 #endif()
-#if(NOT Vulkan_GLSLC_EXECUTABLE)
-#  message(FATAL_ERROR "glslc not found.")
-#endif()
+
+find_program(GLSL_COMPILER glslc NO_CACHE)
+if(GLSL_COMPILER) # glslc args
+  set(GLSL_ARGS "-O")
+else() # glslangValidator args
+  message(WARNING "glslc not found, using slower glslangValidator instead")
+  find_program(GLSL_COMPILER glslangValidator NO_CACHE)
+  set(GLSL_ARGS "-V")
+endif()
+
+if(COMPILE_SHADERS AND NOT GLSL_COMPILER)
+  message(FATAL_ERROR "Suitable shader compiler not found.")
+endif()
 
 add_subdirectory(lib)
 
-find_mondradiko_dependency(
-  mondradiko::vulkan "Vulkan" NOCONFIG
-  INSTALL "vulkan-sdk"
-  Vulkan::Vulkan
-)
+find_package(SDL2 REQUIRED)
+if(TARGET SDL2::SDL2)  # support targeted SDL2 distributions
+  set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main)
+endif()
 
-find_mondradiko_dependency(
-  mondradiko::sdl2 "SDL2" SDL2::SDL2main
-  INSTALL "sdl2[vulkan]"
-  UNIX SDL2::SDL2-static
-  # UNIX SDL2::SDL2
-  WIN32 SDL2::SDL2
-)
-
-find_mondradiko_dependency(
-  mondradiko::libuv "unofficial-libuv" unofficial::libuv::libuv
-  INSTALL "libuv"
-)
-
-find_mondradiko_dependency(
-  mondradiko::openxr "OpenXR"
-  INSTALL "openxr-loader"
-  OpenXR::headers
-  OpenXR::openxr_loader
-  OpenXR::openxr-all-supported
-)
-
-find_mondradiko_dependency(
-  mondradiko::flecs "flecs" flecs::flecs_static
-  INSTALL "flecs"
-)
-
-find_mondradiko_dependency(
-  mondradiko::cglm "cglm" cglm::cglm
-  INSTALL "cglm"
-)
+find_package(OpenXR REQUIRED)
 
 # shaders
 function(spirv_shader ret GLSL VAR)
@@ -68,7 +47,7 @@ function(spirv_shader ret GLSL VAR)
 
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND Vulkan::glslc -O -o ${SPIRV} ${GLSL}
+    COMMAND ${GLSL_COMPILER} ${GLSL_ARGS} ${GLSL} -o ${SPIRV}
     DEPENDS ${GLSL}
   )
 
@@ -93,9 +72,6 @@ set(SHADERS_SRC
 if(COMPILE_SHADERS)
   spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
   add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
-else()
-  message(WARNING "Shader compilation is disabled.")
-  message(WARNING "Ask Marceline on Discord for a .zip of the current shaders.")
 endif()
 
 # main library
@@ -119,13 +95,13 @@ set(MDO_CORE_SRC
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
-  mondradiko::openxr
-  mondradiko::sdl2
-  mondradiko::vulkan
-  mondradiko::libuv
-  mondradiko::cglm
-  tracy
+  ${SDL2_LIBRARIES}
+  OpenXR::openxr_loader
   flecs
+  cglm
+  tracy
+  uv_a
+  volk
 )
 
 add_executable(mdo-cli cli/main.c)

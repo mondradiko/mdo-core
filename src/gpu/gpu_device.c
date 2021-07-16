@@ -10,9 +10,6 @@
 #include <stdlib.h> /* for mem alloc */
 #include <string.h> /* for strlen, memcpy */
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
-
 #define MAX_EXTENSIONS 32
 #define MAX_PHYSICAL_DEVICES 32
 #define MAX_QUEUE_FAMILIES 32
@@ -78,7 +75,7 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 {
   mdo_log_level_t severity;
 
-  const char* log_file = "vulkan_validation";
+  const char *log_file = "vulkan_validation";
   int log_line = callback_data->messageIdNumber;
 
   switch (message_severity)
@@ -246,8 +243,16 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
   gpu->physical_device = VK_NULL_HANDLE;
   gpu->device = VK_NULL_HANDLE;
 
+  if (volkInitialize ())
+    {
+      LOG_ERR ("failed to initialize Volk");
+      return -1;
+    }
+
   if (create_instance (gpu, config))
     return -1;
+
+  volkLoadInstance (gpu->instance);
 
   if (config->physical_device != VK_NULL_HANDLE)
     gpu->physical_device = config->physical_device;
@@ -265,6 +270,8 @@ gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
 
   if (create_logical_device (gpu, config))
     return -1;
+
+  volkLoadDevice (gpu->device);
 
   return 0;
 }
