@@ -75,28 +75,11 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: Checkout libuv (Windows only)
-        uses: actions/checkout@v2
-        if: runner.os == 'Windows'
-        with:
-          repository: 'libuv/libuv'
-          path: 'libuv'
-
-      - name: Build and Install libuv (Windows only)
-        if: runner.os == 'Windows'
-        working-directory: 'libuv'
-        run: |
-          mkdir build
-          pushd build
-          cmake -DLIBUV_BUILD_TESTS=OFF -GNinja ..
-          cmake --build .
-          cmake --install .
-
       - name: apt
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install libuv1-dev libvulkan-dev libsdl2-dev
+          sudo apt install libvulkan-dev libsdl2-dev
 
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Configure
