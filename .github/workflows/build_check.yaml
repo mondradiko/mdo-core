@@ -76,7 +76,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install libuv1-dev libsdl2-dev
+          sudo apt install libuv1-dev libvulkan-dev libsdl2-dev
 
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Configure
