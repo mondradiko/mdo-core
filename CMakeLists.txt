@@ -38,8 +38,6 @@ if(TARGET SDL2::SDL2)  # support targeted SDL2 distributions
   set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main)
 endif()
 
-include(cmake/Findlibuv.cmake)
-
 find_package(OpenXR REQUIRED)
 
 # shaders
@@ -96,12 +94,12 @@ set(MDO_CORE_SRC
 add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
-  ${LIBUV_LIBRARIES}
   ${SDL2_LIBRARIES}
   OpenXR::openxr_loader
   flecs
   cglm
   tracy
+  uv_a
   volk
 )
 

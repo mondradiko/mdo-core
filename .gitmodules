@@ -4,3 +4,6 @@
 [submodule "lib/cglm"]
 	path = lib/cglm
 	url = https://github.com/recp/cglm
+[submodule "lib/libuv"]
+	path = lib/libuv
+	url = https://github.com/libuv/libuv

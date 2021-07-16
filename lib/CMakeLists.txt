@@ -26,6 +26,10 @@ target_include_directories(tracy INTERFACE Tracy)
 add_library(flecs STATIC flecs/flecs.c)
 target_include_directories(flecs PUBLIC flecs)
 
+# libuv
+set(LIBUV_BUILD_TESTS OFF)
+add_subdirectory(libuv)
+
 # volk
 add_library(volk STATIC volk/volk.c)
 target_include_directories(volk PUBLIC volk)
