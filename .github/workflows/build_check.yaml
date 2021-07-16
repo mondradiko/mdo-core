@@ -70,7 +70,7 @@ jobs:
         run: |
           mkdir build
           pushd build
-          cmake -GNinja -DTRACY_ENABLE=ON ..
+          cmake -GNinja -DTRACY_ENABLE=ON -DCOMPILE_SHADERS=OFF ..
 
       - name: compile
         run: ninja -C build
