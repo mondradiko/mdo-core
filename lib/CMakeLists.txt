@@ -1,6 +1,9 @@
 # options
 option(FLECS_PRECOMPILE_HEADER "Precompile flecs.h. Improves build times. Only works in CMake >=3.16" ON)
 
+# Pass local variables into subdirectory options
+cmake_policy(SET CMP0077 NEW)
+
 # Fix Linux relocatable linking
 # Only applies to targets in this scope
 if(UNIX)
