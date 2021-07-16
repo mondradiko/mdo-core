@@ -38,12 +38,7 @@ if(TARGET SDL2::SDL2)  # support targeted SDL2 distributions
   set(SDL2_LIBRARIES SDL2::SDL2 SDL2::SDL2main)
 endif()
 
-include(FindPkgConfig)
-if(NOT PKG_CONFIG_FOUND)
-  message(FATAL_ERROR "pkg-config not found.")
-endif()
-
-pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
+include(cmake/Findlibuv.cmake)
 
 find_package(OpenXR REQUIRED)
 

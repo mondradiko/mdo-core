@@ -1,0 +1,18 @@
+if(UNIX OR MINGW)
+	set(USE_PKG_CONFIG ON)
+else()
+	set(USE_PKG_CONFIG OFF)
+endif()
+
+if(USE_PKG_CONFIG)
+  include(FindPkgConfig)
+  if(NOT PKG_CONFIG_FOUND)
+    message(FATAL_ERROR "pkg-config not found.")
+	endif()
+
+	pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
+else()
+	find_path(LIBUV_INCLUDE_DIR NAMES uv.h)
+	find_library(LIBUV_LIBRARY NAMES uv libuv)
+	set(LIBUV_LIBRARIES ${LIBUV_LIBRARY})
+endif()
