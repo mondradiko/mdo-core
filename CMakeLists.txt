@@ -13,9 +13,9 @@ include_directories(include)
 
 # dependencies
 include(FindVulkan)
-if(NOT Vulkan_FOUND)
-  message(FATAL_ERROR "Vulkan not found.")
-endif()
+#if(NOT Vulkan_FOUND)
+#  message(FATAL_ERROR "Vulkan not found.")
+#endif()
 
 find_program(GLSL_COMPILER glslc NO_CACHE)
 if(GLSL_COMPILER) # glslc args
@@ -95,12 +95,12 @@ add_library(mdo-core SHARED ${MDO_CORE_SRC})
 
 target_link_libraries(mdo-core
   ${LIBUV_LIBRARIES}
-  ${Vulkan_LIBRARIES}
   ${SDL2_LIBRARIES}
   OpenXR::openxr_loader
   flecs
   cglm
   tracy
+  volk
 )
 
 add_executable(mdo-cli cli/main.c)

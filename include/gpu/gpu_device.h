@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <vulkan/vulkan_core.h> /* for handle types */
+#include <volk.h>
 
 /* forward declarations */
 struct vk_config_t;
