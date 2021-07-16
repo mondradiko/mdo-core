@@ -60,6 +60,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: 'libsdl-org/SDL'
+          ref: 'release-2.0.10'
           path: 'SDL2'
 
       - name: Build and Install SDL2 (Windows only)
