@@ -3,6 +3,7 @@
 
 #include "displays/openxr/openxr_display.h"
 
+#include "gpu/vk_config.h"
 #include "log.h"
 
 /* TODO(marceline-cramer): custom mem alloc */
@@ -24,9 +25,15 @@ struct openxr_display_s
 
   /* loaded instance functions */
   DECLARE_XR_FN_PTR (xrGetVulkanGraphicsRequirementsKHR);
-  DECLARE_XR_FN_PTR(xrGetVulkanInstanceExtensionsKHR);
-  DECLARE_XR_FN_PTR(xrGetVulkanGraphicsDeviceKHR);
-  DECLARE_XR_FN_PTR(xrGetVulkanDeviceExtensionsKHR);
+  DECLARE_XR_FN_PTR (xrGetVulkanInstanceExtensionsKHR);
+  DECLARE_XR_FN_PTR (xrGetVulkanGraphicsDeviceKHR);
+  DECLARE_XR_FN_PTR (xrGetVulkanDeviceExtensionsKHR);
+
+  /* Vulkan configuration data */
+  XrGraphicsRequirementsVulkanKHR graphics_reqs;
+  VkPhysicalDevice vkpd;
+  char *vk_instance_exts;
+  char *vk_device_exts;
 
   /* session info */
   gpu_device_t *gpu;
@@ -85,12 +92,46 @@ find_system (openxr_display_t *dp)
 }
 
 static void
-load_fn_ptrs(openxr_display_t *dp)
+load_fn_ptrs (openxr_display_t *dp)
 {
-  LOAD_XR_FN_PTR(xrGetVulkanGraphicsRequirementsKHR);
-  LOAD_XR_FN_PTR(xrGetVulkanInstanceExtensionsKHR);
-  LOAD_XR_FN_PTR(xrGetVulkanGraphicsDeviceKHR);
-  LOAD_XR_FN_PTR(xrGetVulkanDeviceExtensionsKHR);
+  LOAD_XR_FN_PTR (xrGetVulkanGraphicsRequirementsKHR);
+  LOAD_XR_FN_PTR (xrGetVulkanInstanceExtensionsKHR);
+  LOAD_XR_FN_PTR (xrGetVulkanGraphicsDeviceKHR);
+  LOAD_XR_FN_PTR (xrGetVulkanDeviceExtensionsKHR);
+}
+
+static int
+load_vk_config (openxr_display_t *dp)
+{
+  XrInstance xri = dp->instance;
+  XrSystemId sid = dp->system_id;
+
+  dp->graphics_reqs = (XrGraphicsRequirementsVulkanKHR){
+    .type = XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR,
+  };
+
+  if (dp->ext_xrGetVulkanGraphicsRequirementsKHR (xri, sid, &dp->graphics_reqs)
+      != XR_SUCCESS)
+    {
+      LOG_ERR ("failed to get Vulkan graphics requirements");
+      return 1;
+    }
+
+  uint32_t vki_ext_len;
+  uint32_t vkd_ext_len;
+
+  dp->ext_xrGetVulkanInstanceExtensionsKHR (xri, sid, 0, &vki_ext_len, NULL);
+  dp->ext_xrGetVulkanDeviceExtensionsKHR (xri, sid, 0, &vkd_ext_len, NULL);
+
+  dp->vk_instance_exts = malloc (vki_ext_len);
+  dp->vk_device_exts = malloc (vkd_ext_len);
+
+  dp->ext_xrGetVulkanInstanceExtensionsKHR (
+      xri, sid, vki_ext_len, &vki_ext_len, dp->vk_instance_exts);
+  dp->ext_xrGetVulkanDeviceExtensionsKHR (xri, sid, vkd_ext_len, &vkd_ext_len,
+                                          dp->vk_device_exts);
+
+  return 0;
 }
 
 int
@@ -103,6 +144,9 @@ openxr_display_new (openxr_display_t **new_dp)
   dp->session = XR_NULL_HANDLE;
   dp->stage_space = XR_NULL_HANDLE;
 
+  dp->vk_instance_exts = NULL;
+  dp->vk_device_exts = NULL;
+
   if (create_instance (dp))
     return 1;
 
@@ -110,6 +154,9 @@ openxr_display_new (openxr_display_t **new_dp)
     return 1;
 
   load_fn_ptrs (dp);
+
+  if (load_vk_config (dp))
+    return 1;
 
   return 0;
 }
@@ -122,12 +169,26 @@ openxr_display_delete (openxr_display_t *dp)
   if (dp->instance)
     xrDestroyInstance (dp->instance);
 
+  if (dp->vk_instance_exts)
+    free (dp->vk_instance_exts);
+
+  if (dp->vk_device_exts)
+    free (dp->vk_device_exts);
+
   free (dp);
 }
 
 void
 openxr_display_vk_config (openxr_display_t *dp, struct vk_config_t *config)
 {
+  config->min_api_version = dp->graphics_reqs.minApiVersionSupported;
+  config->max_api_version = dp->graphics_reqs.maxApiVersionSupported;
+
+  /* TODO(marceline-cramer) xrGetVulkanGraphicsDeviceKHR AFTER vki creation */
+  config->physical_device = VK_NULL_HANDLE;
+
+  config->instance_extensions = dp->vk_instance_exts;
+  config->device_extensions = dp->vk_device_exts;
 }
 
 camera_t *
