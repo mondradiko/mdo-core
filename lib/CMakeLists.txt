@@ -26,6 +26,11 @@ target_include_directories(tracy INTERFACE Tracy)
 add_library(flecs STATIC flecs/flecs.c)
 target_include_directories(flecs PUBLIC flecs)
 
+# volk
+add_library(volk STATIC volk/volk.c)
+target_include_directories(volk PUBLIC volk)
+target_compile_definitions(volk PUBLIC VK_NO_PROTOTYPES)
+
 if(FLECS_PRECOMPILE_HEADER AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16")
   target_precompile_headers(flecs PUBLIC flecs/flecs.h)
 endif()
