@@ -57,13 +57,26 @@ jobs:
         working-directory: 'OpenXR-SDK/build'
         run: cmake --install .
 
+      - uses: actions/checkout@v2
+        with:
+          repository: 'libsdl-org/SDL'
+          path: 'SDL2'
+
+      - name: Build and Install SDL2 (Windows only)
+        if: runner.os == 'Windows'
+        working-directory: 'SDL2'
+        run: |
+          mkdir build
+          pushd build
+          cmake -GNinja ..
+          cmake --build .
+          cmake --install .
+
       - name: apt
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install \
-            libglvnd-dev libxrandr-dev libwayland-dev \
-            libuv1-dev libvulkan-dev glslang-tools libsdl2-dev
+          sudo apt install libuv1-dev libsdl2-dev
 
       - uses: mondradiko/gha-setup-ninja@v3
       - name: Configure
