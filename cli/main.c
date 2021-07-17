@@ -25,6 +25,7 @@ typedef struct cli_state_s
   gpu_device_t *gpu;
   renderer_t *ren;
   world_t *w;
+  debug_script_t *ds;
 
   union
   {
@@ -74,6 +75,7 @@ init_cli_state (cli_state_t *cli)
   cli->gpu = NULL;
   cli->ren = NULL;
   cli->w = NULL;
+  cli->ds = NULL;
 
   if (cli->is_client)
     cli->network.client = NULL;
@@ -119,6 +121,12 @@ create_cli_objects (cli_state_t *cli)
       if (world_new (&cli->w, renderer_get_debug_draw_list (cli->ren)))
         {
           LOG_ERR ("failed to create world");
+          return 1;
+        }
+
+      if (debug_script_new (&cli->ds, renderer_get_debug_draw_list (cli->ren)))
+        {
+          LOG_ERR ("failed to create debug script");
           return 1;
         }
     }
@@ -227,12 +235,6 @@ main (int argc, const char *argv[])
 
   if (signal (SIGINT, signal_handler) == SIG_ERR)
     LOG_WRN ("can't catch SIGINT");
-
-  result = wavm_test();
-  if (result) {
-    LOG_ERR ("wavm_test() returned non-zero status, exiting");
-    return result;
-  }
 
   struct display_poll_t poll;
   poll.should_exit = 0;
