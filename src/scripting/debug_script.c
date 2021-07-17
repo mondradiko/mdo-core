@@ -15,7 +15,6 @@
 
 #define own
 
-wasm_compartment_t* compartment = NULL;
 wasm_memory_t* memory = NULL;
 
 struct debug_script_s
@@ -27,6 +26,7 @@ struct debug_script_s
 
   // Don't delete at end
   wasm_memory_t *memory;
+  wasm_func_t *update_func;
 };
 
 static void handle_trap(wasm_trap_t* trap)
@@ -83,23 +83,20 @@ static own wasm_trap_t* hello_callback(const wasm_val_t args[], wasm_val_t resul
 int
 debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
 {
-  // Initialize.
-  wasm_engine_t* engine = wasm_engine_new();
-  compartment = wasm_compartment_new(engine, "compartment");
-  wasm_store_t* store = wasm_store_new(compartment, "store");
-
   debug_script_t *ds = malloc (sizeof (debug_script_t));
   *new_ds = ds;
 
-  ds->engine = engine;
-  ds->compartment = compartment;
-  ds->store = store;
+  ds->engine = wasm_engine_new();
+  ds->compartment = wasm_compartment_new(ds->engine, "compartment");
+  ds->store = wasm_store_new(ds->compartment, "store");
+
 
   char hello_wast[]
     = "(module\n"
       "  (import \"\" \"hello\" (func $1 (param i32 i32) (result i32)))\n"
       "  (memory (export \"memory\") 1)\n"
       "  (global $nextFreeMemoryAddress (mut i32) (i32.const 0))\n"
+      "  (global $timeElapsed (mut f32) (f32.const 0))\n"
       "  (func (export \"malloc\") (param $numBytes i32) (result i32)\n"
       "  (local $address i32)\n"
       "  (local.set $address (global.get $nextFreeMemoryAddress))\n"
@@ -110,10 +107,14 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
       "  (func (export \"run\") (param $address i32) (param $num_chars i32) (result i32)\n"
       "  (call $1 (local.get $address) (local.get $num_chars))\n"
       "  )\n"
+      "  (func (export \"update\") (param $dt f32) (result f32)\n"
+      "  (global.set $timeElapsed (f32.add (global.get $timeElapsed) (local.get $dt)))\n"
+      "  (global.get $timeElapsed)\n"
+      "  )\n"
       ")";
 
   // Compile.
-  own wasm_module_t* module = wasm_module_new_text(engine, hello_wast, sizeof(hello_wast));
+  own wasm_module_t* module = wasm_module_new_text(ds->engine, hello_wast, sizeof(hello_wast));
   if(!module)
   {
     LOG_ERR ("Failed to compile module.\n");
@@ -123,7 +124,7 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   // Create external print functions.
   own wasm_functype_t* hello_type = wasm_functype_new_2_1(
     wasm_valtype_new_i32(), wasm_valtype_new_i32(), wasm_valtype_new_i32());
-  own wasm_func_t* hello_func = wasm_func_new(compartment, hello_type, hello_callback, "hello");
+  own wasm_func_t* hello_func = wasm_func_new(ds->compartment, hello_type, hello_callback, "hello");
 
   wasm_functype_delete(hello_type);
 
@@ -131,7 +132,7 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   const wasm_extern_t* imports[1];
   imports[0] = wasm_func_as_extern(hello_func);
   wasm_trap_t* trap = NULL;
-  own wasm_instance_t* instance = wasm_instance_new(store, module, imports, &trap, "instance");
+  own wasm_instance_t* instance = wasm_instance_new(ds->store, module, imports, &trap, "instance");
   if(!instance)
   {
     handle_trap(trap);
@@ -153,6 +154,12 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   assert(run_extern);
   const wasm_func_t* run_func = wasm_extern_as_func(run_extern);
   assert(run_func);
+  wasm_extern_t* update_extern = wasm_instance_export(instance, 3);
+  assert(update_extern);
+  const wasm_func_t* update_func = wasm_extern_as_func(update_extern);
+  assert(update_func);
+
+  ds->update_func = update_func;
 
   wasm_module_delete(module);
   wasm_instance_delete(instance);
@@ -164,7 +171,7 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   wasm_val_t malloc_args[1];
   wasm_val_t malloc_results[1];
   malloc_args[0].i32 = (int32_t)num_string_chars;
-  trap = wasm_func_call(store, malloc_func, malloc_args, malloc_results);
+  trap = wasm_func_call(ds->store, malloc_func, malloc_args, malloc_results);
   if(trap)
   {
     handle_trap(trap);
@@ -194,7 +201,7 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   wasm_val_t run_results[1];
   run_args[0].i32 = string_address;
   run_args[1].i32 = (int32_t)num_string_chars;
-  trap = wasm_func_call(store, run_func, run_args, run_results);
+  trap = wasm_func_call(ds->store, run_func, run_args, run_results);
   if(trap)
   {
     handle_trap(trap);
@@ -203,10 +210,24 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
 
   LOG_INF ("WASM call returned: %i\n", run_results[0].i32);
 
-  // Shut down.
-  debug_script_delete(ds);
-
   return 0;
+}
+
+void
+debug_script_step(debug_script_t *ds, float dt) {
+	//*/
+    wasm_val_t update_args[1];
+    wasm_val_t update_results[1];
+    update_args[0].f32 = (wasm_float32_t)dt;
+    wasm_trap_t* trap = wasm_func_call(ds->store, ds->update_func, update_args, update_results);
+    if(trap)
+    {
+      handle_trap(trap);
+      return;
+    }
+
+	LOG_INF ("debug script: time elapsed = %f", update_results[0].f32);
+	//*/
 }
 
 void

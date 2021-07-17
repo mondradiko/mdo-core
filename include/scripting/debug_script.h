@@ -9,8 +9,6 @@
  */
 typedef struct debug_script_s debug_script_t;
 
-int wavm_test(void);
-
 /** @function debug_script_new
  */
 int debug_script_new (debug_script_t **, debug_draw_list_t *);

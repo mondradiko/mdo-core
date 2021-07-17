@@ -171,6 +171,9 @@ cleanup_cli_state (cli_state_t *cli)
         network_server_delete (cli->network.server);
     }
 
+  if (cli->ds)
+    debug_script_delete (cli->ds);
+
   if (cli->w)
     world_delete (cli->w);
 
@@ -237,6 +240,7 @@ main (int argc, const char *argv[])
     LOG_WRN ("can't catch SIGINT");
 
   struct display_poll_t poll;
+  poll.dt = 1.0f / 60;  // TODO replace with actual time values in loop
   poll.should_exit = 0;
   while (!poll.should_exit && !g_interrupted)
     {
@@ -247,6 +251,7 @@ main (int argc, const char *argv[])
           if (poll.should_run)
             {
               world_step (cli.w, poll.dt);
+              debug_script_step (cli.ds, poll.dt);
             }
 
           if (poll.should_render)
