@@ -134,6 +134,11 @@ target_link_libraries(mdo-core
   tracy
 )
 
+# TODO replace with command-line argument?
+file(COPY
+  debug_script.wat
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 add_executable(mdo-cli cli/main.c)
 target_link_libraries(mdo-cli mdo-core)
 

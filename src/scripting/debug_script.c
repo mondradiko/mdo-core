@@ -15,6 +15,8 @@
 
 #define own
 
+const char *filename = "debug_script.wat";
+
 wasm_memory_t* memory = NULL;
 
 struct debug_script_s
@@ -26,7 +28,7 @@ struct debug_script_s
 
   // Don't delete at end
   wasm_memory_t *memory;
-  wasm_func_t *update_func;
+  const wasm_func_t *update_func;
 };
 
 static void handle_trap(wasm_trap_t* trap)
@@ -91,30 +93,29 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   ds->store = wasm_store_new(ds->compartment, "store");
 
 
-  char hello_wast[]
-    = "(module\n"
-      "  (import \"\" \"hello\" (func $1 (param i32 i32) (result i32)))\n"
-      "  (memory (export \"memory\") 1)\n"
-      "  (global $nextFreeMemoryAddress (mut i32) (i32.const 0))\n"
-      "  (global $timeElapsed (mut f32) (f32.const 0))\n"
-      "  (func (export \"malloc\") (param $numBytes i32) (result i32)\n"
-      "  (local $address i32)\n"
-      "  (local.set $address (global.get $nextFreeMemoryAddress))\n"
-      "  (global.set $nextFreeMemoryAddress\n"
-      "    (i32.add (local.get $address) (local.get $numBytes)))\n"
-      "  (local.get $address)\n"
-      "  )\n"
-      "  (func (export \"run\") (param $address i32) (param $num_chars i32) (result i32)\n"
-      "  (call $1 (local.get $address) (local.get $num_chars))\n"
-      "  )\n"
-      "  (func (export \"update\") (param $dt f32) (result f32)\n"
-      "  (global.set $timeElapsed (f32.add (global.get $timeElapsed) (local.get $dt)))\n"
-      "  (global.get $timeElapsed)\n"
-      "  )\n"
-      ")";
+  FILE *f = fopen (filename, "rb");
+  if (!f)
+  {
+    LOG_ERR("Failed to load Wasm file at path: %s.", filename);
+    return 1;
+  }
+
+  char *file_contents;
+
+  fseek (f, 0, SEEK_END);
+  size_t file_size = ftell (f) + 1;
+  fseek (f, 0, SEEK_SET);
+  file_contents = malloc (file_size);
+  fread (file_contents, 1, file_size - 1, f);
+  fclose (f);
+
+  // Source must be null-terminated... maybe because it's in text format??
+  file_contents[file_size - 1] = '\0';
+
+  LOG_INF ("file_contents: %s", file_contents);
 
   // Compile.
-  own wasm_module_t* module = wasm_module_new_text(ds->engine, hello_wast, sizeof(hello_wast));
+  own wasm_module_t* module = wasm_module_new_text(ds->engine, file_contents, file_size);
   if(!module)
   {
     LOG_ERR ("Failed to compile module.\n");
@@ -127,6 +128,8 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
   own wasm_func_t* hello_func = wasm_func_new(ds->compartment, hello_type, hello_callback, "hello");
 
   wasm_functype_delete(hello_type);
+
+  // TODO pass debug draw calls to Wasm
 
   // Instantiate.
   const wasm_extern_t* imports[1];
@@ -215,19 +218,17 @@ debug_script_new(debug_script_t **new_ds, debug_draw_list_t *ddl)
 
 void
 debug_script_step(debug_script_t *ds, float dt) {
-	//*/
-    wasm_val_t update_args[1];
-    wasm_val_t update_results[1];
-    update_args[0].f32 = (wasm_float32_t)dt;
-    wasm_trap_t* trap = wasm_func_call(ds->store, ds->update_func, update_args, update_results);
-    if(trap)
-    {
-      handle_trap(trap);
-      return;
-    }
+  wasm_val_t update_args[1];
+  wasm_val_t update_results[1];
+  update_args[0].f32 = (wasm_float32_t)dt;
+  wasm_trap_t* trap = wasm_func_call(ds->store, ds->update_func, update_args, update_results);
+  if(trap)
+  {
+    handle_trap(trap);
+    return;
+  }
 
-	LOG_INF ("debug script: time elapsed = %f", update_results[0].f32);
-	//*/
+  LOG_INF ("debug script: time elapsed = %f", update_results[0].f32);
 }
 
 void
