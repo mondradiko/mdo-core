@@ -11,6 +11,7 @@
 #include "network/network_client.h"
 #include "network/network_server.h"
 #include "renderer/renderer.h"
+#include "scripting/debug_script.h"
 #include "world/world.h"
 
 typedef struct cli_state_s
@@ -226,6 +227,12 @@ main (int argc, const char *argv[])
 
   if (signal (SIGINT, signal_handler) == SIG_ERR)
     LOG_WRN ("can't catch SIGINT");
+
+  result = wavm_test();
+  if (result) {
+    LOG_ERR ("wavm_test() returned non-zero status, exiting");
+    return result;
+  }
 
   struct display_poll_t poll;
   poll.should_exit = 0;
