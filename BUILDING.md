@@ -102,5 +102,20 @@ run ninja
 cd into bin all the source files should build correctly
 run mdo-cli
 
-# i386 (ARMv7/v8)
-TBA (cmake, clang?)
+# OSX(i386, ARMv7/v8, ARM64/64e)
+Foreword: Clang plays super nice with MDO, there was only minimal cmake file editing necessary to account for architectures(x86_64 in this case) that may not have been immediately listed or accessible to cmake. 
+
+Download CMake, clone the mdo-core repository, and point to your /src/ and /bin/ folders respectively (make /bin/ if it doesn't exist) in cmake
+
+Disable VCPKG by cding into mdo-core/cmake and removing the entire mondradiko-vcpkg.cmake file (consequences and implications discussed further below and in issues)
+
+CMAKE_OSX_ARCHITECTURES currently points at libSystem.tbd rather than pipe a link to the same .dyLib which xcode uses. For this reason the only applicable types (which won't throw a build error telling you about the aforementioned dynamic link missing) are the following: x86_64 and x86_64h, you may put both (seperated by semi-colons, eg: x86_64;x86_64h
+
+CMAKE_OSX_DEPLOYMENT_TARGET is asking for a number in the following format: xx.xx (eg: 10.15) 
+feel free to put your current version of OSX as the build target
+
+You can now proceed and generate the project's bin; overall the outcome is very similar to the win64 build though it ultimately would require an extra step before getting a full executable by comparison. This requirement is to create an xcode project which has necessary subsystems(ie: OSX Versions) then attached to it of each(openxr, flecs, etc) because of a fatal bug with mondradiko_find_dependency on OSX Catalina it's currently ill advised to use vcpkg on Macintosh at all; Yet this forces users to manually build the projects dependencies AND finish the job cmake started for the time being.
+
+Additionally, xcode virtually bars access to the i386 - arm64e build systems without linking either it's binaries (for clang) or building via xcode  (hence the need for an extra step). This is something that must be manually clarified as, by default, cmake will never assume the user has xcode and xcode does not come by default with OSX. Hence some extra work is necessary.
+
+To Be Continued (Setting up, Configuring, and Building mdo-core as an XCode project)
