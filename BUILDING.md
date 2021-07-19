@@ -109,7 +109,7 @@ Download CMake, clone the mdo-core repository, and point to your /src/ and /bin/
 
 Disable VCPKG by cding into mdo-core/cmake and removing the entire mondradiko-vcpkg.cmake file (consequences and implications discussed further below and in issues)
 
-CMAKE_OSX_ARCHITECTURES currently points at libSystem.tbd rather than pipe a link to the same .dyLib which xcode uses. For this reason the only applicable types (which won't throw a build error telling you about the aforementioned dynamic link missing) are the following: x86_64 and x86_64h, you may put both (seperated by semi-colons, eg: x86_64;x86_64h
+CMAKE_OSX_ARCHITECTURES currently points at libSystem.tbd rather than pipe a link to the same .dyLib which xcode uses to build to all modern Apple Devices(ARMv7/64, plus all subtypes). For this reason the only applicable types (which won't throw a build error telling you about the aforementioned dynamic link is missing) are the following: x86_64 and x86_64h, you may put both (seperated by semi-colons, eg: x86_64;x86_64h)
 
 CMAKE_OSX_DEPLOYMENT_TARGET is asking for a number in the following format: xx.xx (eg: 10.15) 
 feel free to put your current version of OSX as the build target
