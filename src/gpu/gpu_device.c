@@ -97,7 +97,7 @@ debug_callback (VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 }
 
 static int
-create_instance (gpu_device_t *gpu, const struct vk_config_t *config)
+create_instance (gpu_device_t *gpu, const vk_config_t *config)
 {
   VkApplicationInfo app_info = {
     .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -190,7 +190,7 @@ find_queue_families (gpu_device_t *gpu)
 }
 
 static int
-create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
+create_logical_device (gpu_device_t *gpu, const vk_config_t *config)
 {
   char *device_ext_list = malloc (strlen (config->device_extensions) + 1);
   strcpy (device_ext_list, config->device_extensions);
@@ -234,7 +234,7 @@ create_logical_device (gpu_device_t *gpu, const struct vk_config_t *config)
 }
 
 int
-gpu_device_new (gpu_device_t **new_gpu, const struct vk_config_t *config)
+gpu_device_new (gpu_device_t **new_gpu, const vk_config_t *config)
 {
   gpu_device_t *gpu = malloc (sizeof (gpu_device_t));
   *new_gpu = gpu;

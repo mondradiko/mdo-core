@@ -4,11 +4,11 @@
 #pragma once
 
 #include "gpu/gpu_device.h"
+#include "gpu/vk_config.h"
 #include "renderer/camera.h"
 
 /* forward declarations */
 struct display_poll_t;
-struct vk_config_t;
 
 /** @typedef sdl_display_t
  */
@@ -26,7 +26,7 @@ void sdl_display_delete (sdl_display_t *);
 
 /** @function sdl_display_vk_config
  */
-void sdl_display_vk_config (sdl_display_t *, struct vk_config_t *);
+void sdl_display_vk_config (sdl_display_t *, vk_config_t *);
 
 /** @function sdl_display_get_camera
  */

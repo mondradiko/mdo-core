@@ -119,7 +119,7 @@ sdl_display_delete (sdl_display_t *dp)
 }
 
 void
-sdl_display_vk_config (sdl_display_t *dp, struct vk_config_t *config)
+sdl_display_vk_config (sdl_display_t *dp, vk_config_t *config)
 {
   config->min_api_version = VK_API_VERSION_1_0;
   config->max_api_version = VK_API_VERSION_1_2;

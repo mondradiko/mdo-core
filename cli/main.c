@@ -101,7 +101,7 @@ create_cli_objects (cli_state_t *cli)
 {
   if (cli->dp_impl != HEADLESS_DISPLAY)
     {
-      struct vk_config_t vk_config;
+      vk_config_t vk_config;
 
       switch (cli->dp_impl)
         {

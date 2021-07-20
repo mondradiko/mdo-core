@@ -180,7 +180,7 @@ openxr_display_delete (openxr_display_t *dp)
 }
 
 void
-openxr_display_vk_config (openxr_display_t *dp, struct vk_config_t *config)
+openxr_display_vk_config (openxr_display_t *dp, vk_config_t *config)
 {
   config->min_api_version = dp->graphics_reqs.minApiVersionSupported;
   config->max_api_version = dp->graphics_reqs.maxApiVersionSupported;

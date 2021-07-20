@@ -7,7 +7,7 @@
 
 #include <vulkan/vulkan_core.h> /* for VkPhysicalDevice */
 
-struct vk_config_t
+typedef struct
 {
   /**
    * The minimum/maximum Vulkan API version. Set to one of VK_API_VERSION_*.
@@ -30,4 +30,4 @@ struct vk_config_t
    * If set to VK_NULL_HANDLE, the physical device is selected automatically.
    */
   VkPhysicalDevice physical_device;
-};
+} vk_config_t;

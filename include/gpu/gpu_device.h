@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include <volk.h>
+#include "gpu/vk_config.h"
 
-/* forward declarations */
-struct vk_config_t;
+#include <volk.h>
 
 /** @typedef gpu_device_t
  */
@@ -14,7 +13,7 @@ typedef struct gpu_device_s gpu_device_t;
 
 /** @function gpu_device_new
  */
-int gpu_device_new (gpu_device_t **, const struct vk_config_t *);
+int gpu_device_new (gpu_device_t **, const vk_config_t *);
 
 /** @function gpu_device_delete
  */

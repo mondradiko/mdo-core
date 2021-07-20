@@ -5,6 +5,7 @@
 
 #include "displays/display.h"
 #include "gpu/gpu_device.h"
+#include "gpu/vk_config.h"
 #include "renderer/camera.h"
 
 /** @typedef openxr_display_t
@@ -21,7 +22,7 @@ void openxr_display_delete (openxr_display_t *);
 
 /** @function openxr_display_vk_config
  */
-void openxr_display_vk_config (openxr_display_t *, struct vk_config_t *);
+void openxr_display_vk_config (openxr_display_t *, vk_config_t *);
 
 /** @function openxr_display_get_camera
  */
