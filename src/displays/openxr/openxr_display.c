@@ -3,6 +3,7 @@
 
 #include "displays/openxr/openxr_display.h"
 
+#include "gpu/gpu_device.h"
 #include "gpu/vk_config.h"
 #include "log.h"
 
@@ -200,6 +201,26 @@ openxr_display_get_camera (openxr_display_t *dp)
 int
 openxr_display_begin_session (openxr_display_t *dp, gpu_device_t *gpu)
 {
+  XrGraphicsBindingVulkanKHR gb_vk = {
+    .type = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR,
+    .instance = gpu_device_get_instance (gpu),
+    .physicalDevice = gpu_device_get_physical (gpu),
+    .device = gpu_device_get (gpu),
+    .queueFamilyIndex = gpu_device_gfx_family (gpu),
+  };
+
+  XrSessionCreateInfo ci = {
+    .type = XR_TYPE_SESSION_CREATE_INFO,
+    .next = &gb_vk,
+    .systemId = dp->system_id,
+  };
+
+  if (xrCreateSession (dp->instance, &ci, &dp->session) != XR_SUCCESS)
+    {
+      LOG_ERR ("failed to create session");
+      return 1;
+    }
+
   return 0;
 }
 
