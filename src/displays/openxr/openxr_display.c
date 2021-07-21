@@ -179,17 +179,30 @@ openxr_display_delete (openxr_display_t *dp)
   free (dp);
 }
 
+static int
+select_physical_device (void *data, VkInstance vki, VkPhysicalDevice *vkpd)
+{
+  openxr_display_t *dp = data;
+  XrInstance xri = dp->instance;
+  XrSystemId sid = dp->system_id;
+  if (dp->ext_xrGetVulkanGraphicsDeviceKHR (xri, sid, vki, vkpd) != XR_SUCCESS)
+    {
+      LOG_ERR ("failed to get Vulkan graphics device");
+      return 1;
+    }
+
+  return 0;
+}
+
 void
 openxr_display_vk_config (openxr_display_t *dp, vk_config_t *config)
 {
   config->min_api_version = dp->graphics_reqs.minApiVersionSupported;
   config->max_api_version = dp->graphics_reqs.maxApiVersionSupported;
-
-  /* TODO(marceline-cramer) xrGetVulkanGraphicsDeviceKHR AFTER vki creation */
-  config->physical_device = VK_NULL_HANDLE;
-
   config->instance_extensions = dp->vk_instance_exts;
   config->device_extensions = dp->vk_device_exts;
+  config->select_physical_device_cb = select_physical_device;
+  config->data = dp;
 }
 
 camera_t *

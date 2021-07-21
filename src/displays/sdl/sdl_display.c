@@ -125,7 +125,7 @@ sdl_display_vk_config (sdl_display_t *dp, vk_config_t *config)
   config->max_api_version = VK_API_VERSION_1_2;
   config->instance_extensions = dp->instance_extensions;
   config->device_extensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-  config->physical_device = VK_NULL_HANDLE;
+  config->select_physical_device_cb = NULL;
 }
 
 int

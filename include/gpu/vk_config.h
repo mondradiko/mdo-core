@@ -24,10 +24,15 @@ typedef struct
   const char *instance_extensions;
   const char *device_extensions;
 
-  /**
-   * The VkPhysicalDevice to use.
-   *
-   * If set to VK_NULL_HANDLE, the physical device is selected automatically.
+  /** @function select_physical_device_cb
+   * If the callback pointer is NULL, autoselects.
+   * If vkpd is set to NULL, autoselects.
+   * Returns 0 on success.
    */
-  VkPhysicalDevice physical_device;
+  int (*select_physical_device_cb) (void *, VkInstance, VkPhysicalDevice *);
+
+  /**
+   * Userdata to pass to #select_physical_device_cb.
+   */
+  void *data;
 } vk_config_t;

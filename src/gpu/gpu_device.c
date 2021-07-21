@@ -170,6 +170,31 @@ autoselect_physical_device (gpu_device_t *gpu)
 }
 
 static int
+find_physical_device (gpu_device_t *gpu, const vk_config_t *config)
+{
+  if (config->select_physical_device_cb)
+    {
+      if (config->select_physical_device_cb (config->data, gpu->instance,
+                                             &gpu->physical_device))
+        {
+          LOG_ERR ("failed to select Vulkan physical device from callback");
+          return 1;
+        }
+    }
+
+  if (!gpu->physical_device)
+    gpu->physical_device = autoselect_physical_device (gpu);
+
+  if (gpu->physical_device == VK_NULL_HANDLE)
+    {
+      LOG_ERR ("failed to autoselect Vulkan physical device");
+      return 1;
+    }
+
+  return 0;
+}
+
+static int
 find_queue_families (gpu_device_t *gpu)
 {
   uint32_t num = MAX_PHYSICAL_DEVICES;
@@ -254,16 +279,8 @@ gpu_device_new (gpu_device_t **new_gpu, const vk_config_t *config)
 
   volkLoadInstance (gpu->instance);
 
-  if (config->physical_device != VK_NULL_HANDLE)
-    gpu->physical_device = config->physical_device;
-  else
-    gpu->physical_device = autoselect_physical_device (gpu);
-
-  if (gpu->physical_device == VK_NULL_HANDLE)
-    {
-      LOG_ERR ("failed to find Vulkan physical device");
-      return -1;
-    }
+  if (find_physical_device (gpu, config))
+    return -1;
 
   if (find_queue_families (gpu))
     return -1;
