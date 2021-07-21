@@ -39,6 +39,7 @@ struct openxr_display_s
   /* session info */
   gpu_device_t *gpu;
   XrSession session;
+  XrSessionState session_state;
   XrSpace stage_space;
 };
 
@@ -275,10 +276,134 @@ openxr_display_end_session (openxr_display_t *dp)
   dp->stage_space = XR_NULL_HANDLE;
 }
 
+static void
+handle_session_state_change (openxr_display_t *dp,
+                             XrEventDataSessionStateChanged *event)
+{
+  dp->session_state = event->state;
+  switch (dp->session_state)
+    {
+    case XR_SESSION_STATE_READY:
+      {
+        LOG_DBG ("session ready; beginning session");
+
+        XrSessionBeginInfo bi = {
+          .type = XR_TYPE_SESSION_BEGIN_INFO,
+          .primaryViewConfigurationType
+          = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO,
+        };
+
+        if (xrBeginSession (dp->session, &bi) != XR_SUCCESS)
+          {
+            LOG_ERR ("failed to begin session");
+            break;
+          }
+
+        break;
+      }
+
+    case XR_SESSION_STATE_VISIBLE:
+      {
+        LOG_DBG ("session is visible");
+        break;
+      }
+
+    case XR_SESSION_STATE_FOCUSED:
+      {
+        LOG_DBG ("session is focused");
+        break;
+      }
+
+    case XR_SESSION_STATE_IDLE:
+      {
+        LOG_DBG ("session is idle");
+        break;
+      }
+
+    case XR_SESSION_STATE_STOPPING:
+    case XR_SESSION_STATE_EXITING:
+    case XR_SESSION_STATE_LOSS_PENDING:
+      {
+        LOG_DBG ("ending session");
+        xrEndSession (dp->session);
+        break;
+      }
+
+    default:
+      break;
+    }
+}
+
+static int
+handle_event (openxr_display_t *dp, struct display_poll_t *poll,
+              XrEventDataBuffer *event)
+{
+  switch (event->type)
+    {
+    case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED:
+      {
+        XrEventDataSessionStateChanged *ssc
+            = (XrEventDataSessionStateChanged *)event;
+        handle_session_state_change (dp, ssc);
+        break;
+      }
+
+    case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING:
+      {
+        poll->should_exit = 1;
+        return 1;
+      }
+
+    default:
+      break;
+    }
+
+  return 0;
+}
+
 void
 openxr_display_poll (openxr_display_t *dp, struct display_poll_t *poll)
 {
   poll->should_exit = 0;
-  poll->should_render = 1;
-  poll->should_run = 1;
+  poll->should_render = 0;
+  poll->should_run = 0;
+
+  while (true)
+    {
+      XrEventDataBuffer event = { .type = XR_TYPE_EVENT_DATA_BUFFER };
+      if (xrPollEvent (dp->instance, &event) != XR_SUCCESS)
+        break;
+      if (handle_event (dp, poll, &event))
+        return;
+    }
+
+  switch (dp->session_state)
+    {
+    case XR_SESSION_STATE_UNKNOWN:
+    case XR_SESSION_STATE_IDLE:
+    default:
+      {
+        poll->should_exit = 0;
+        poll->should_run = 0;
+        break;
+      }
+
+    case XR_SESSION_STATE_READY:
+    case XR_SESSION_STATE_VISIBLE:
+    case XR_SESSION_STATE_FOCUSED:
+      {
+        poll->should_exit = 0;
+        poll->should_run = 1;
+        break;
+      }
+
+    case XR_SESSION_STATE_STOPPING:
+    case XR_SESSION_STATE_LOSS_PENDING:
+    case XR_SESSION_STATE_EXITING:
+      {
+        poll->should_exit = 1;
+        poll->should_run = 0;
+        break;
+      }
+    }
 }
