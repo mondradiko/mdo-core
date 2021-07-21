@@ -211,6 +211,28 @@ openxr_display_get_camera (openxr_display_t *dp)
   return NULL;
 }
 
+static int
+create_stage_space (openxr_display_t *dp)
+{
+  XrPosef pose = { 0 };
+  pose.orientation = (XrQuaternionf){ 0.0, 0.0, 0.0, 1.0 };
+  pose.position = (XrVector3f){ 0.0, 0.0, 0.0 };
+  XrReferenceSpaceCreateInfo ci = {
+    .type = XR_TYPE_REFERENCE_SPACE_CREATE_INFO,
+    .referenceSpaceType = XR_REFERENCE_SPACE_TYPE_STAGE,
+    .poseInReferenceSpace = pose,
+  };
+
+  if (xrCreateReferenceSpace (dp->session, &ci, &dp->stage_space)
+      != XR_SUCCESS)
+    {
+      LOG_ERR ("failed to create stage space");
+      return 1;
+    }
+
+  return 0;
+}
+
 int
 openxr_display_begin_session (openxr_display_t *dp, gpu_device_t *gpu)
 {
@@ -233,6 +255,9 @@ openxr_display_begin_session (openxr_display_t *dp, gpu_device_t *gpu)
       LOG_ERR ("failed to create session");
       return 1;
     }
+
+  if (create_stage_space (dp))
+    return 1;
 
   return 0;
 }
