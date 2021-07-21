@@ -40,6 +40,7 @@ struct openxr_display_s
   gpu_device_t *gpu;
   XrSession session;
   XrSessionState session_state;
+  XrFrameState frame_state;
   XrSpace stage_space;
 };
 
@@ -361,9 +362,43 @@ handle_event (openxr_display_t *dp, struct display_poll_t *poll,
   return 0;
 }
 
+static void
+begin_frame (openxr_display_t *dp, struct display_poll_t *poll)
+{
+  dp->frame_state = (XrFrameState){ .type = XR_TYPE_FRAME_STATE };
+
+  xrWaitFrame (dp->session, NULL, &dp->frame_state);
+
+  /* nanoseconds to seconds */
+  poll->dt = dp->frame_state.predictedDisplayPeriod / 1000000000.0;
+
+  /* TODO(marceline-cramer) rendering is disabled until the camera is made */
+  /*if (dp->frame_state.shouldRender == XR_TRUE)
+    poll->should_render = 1;
+  else
+    poll->should_render = 0;*/
+
+  xrBeginFrame (dp->session, NULL);
+}
+
+static void
+end_frame (openxr_display_t *dp)
+{
+  XrFrameEndInfo ei = {
+    .type = XR_TYPE_FRAME_END_INFO,
+    .displayTime = dp->frame_state.predictedDisplayPeriod,
+    .environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE,
+    .layerCount = 0,
+  };
+
+  xrEndFrame (dp->session, &ei);
+}
+
 void
 openxr_display_poll (openxr_display_t *dp, struct display_poll_t *poll)
 {
+  end_frame (dp);
+
   poll->should_exit = 0;
   poll->should_render = 0;
   poll->should_run = 0;
@@ -406,4 +441,6 @@ openxr_display_poll (openxr_display_t *dp, struct display_poll_t *poll)
         break;
       }
     }
+
+  begin_frame (dp, poll);
 }
