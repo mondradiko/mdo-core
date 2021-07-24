@@ -42,6 +42,7 @@ struct openxr_display_s
   XrSessionState session_state;
   XrFrameState frame_state;
   XrSpace stage_space;
+  camera_t *camera;
 };
 
 static int
@@ -146,6 +147,7 @@ openxr_display_new (openxr_display_t **new_dp)
   dp->instance = XR_NULL_HANDLE;
   dp->session = XR_NULL_HANDLE;
   dp->stage_space = XR_NULL_HANDLE;
+  dp->camera = NULL;
 
   dp->vk_instance_exts = NULL;
   dp->vk_device_exts = NULL;
@@ -210,7 +212,7 @@ openxr_display_vk_config (openxr_display_t *dp, vk_config_t *config)
 camera_t *
 openxr_display_get_camera (openxr_display_t *dp)
 {
-  return NULL;
+  return dp->camera;
 }
 
 static int
@@ -238,6 +240,8 @@ create_stage_space (openxr_display_t *dp)
 int
 openxr_display_begin_session (openxr_display_t *dp, gpu_device_t *gpu)
 {
+  dp->gpu = gpu;
+
   XrGraphicsBindingVulkanKHR gb_vk = {
     .type = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR,
     .instance = gpu_device_get_instance (gpu),
@@ -261,12 +265,26 @@ openxr_display_begin_session (openxr_display_t *dp, gpu_device_t *gpu)
   if (create_stage_space (dp))
     return 1;
 
+  struct camera_config cam = {
+    .gpu = dp->gpu,
+    .viewport_num = 0,
+  };
+
+  if (camera_new (&dp->camera, &cam))
+    {
+      LOG_ERR ("failed to create camera");
+      return 1;
+    }
+
   return 0;
 }
 
 void
 openxr_display_end_session (openxr_display_t *dp)
 {
+  if (dp->camera)
+    camera_delete (dp->camera);
+
   if (dp->stage_space)
     xrDestroySpace (dp->stage_space);
 
@@ -275,6 +293,7 @@ openxr_display_end_session (openxr_display_t *dp)
 
   dp->session = XR_NULL_HANDLE;
   dp->stage_space = XR_NULL_HANDLE;
+  dp->camera = NULL;
 }
 
 static void
