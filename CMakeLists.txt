@@ -39,6 +39,11 @@ find_mondradiko_dependency(
 )
 
 find_mondradiko_dependency(
+  mondradiko::wavm "WAVM" WAVM::libWAVM
+  INSTALL "wavm"
+)
+
+find_mondradiko_dependency(
   mondradiko::libuv "unofficial-libuv" unofficial::libuv::libuv
   INSTALL "libuv"
 )
@@ -111,6 +116,7 @@ set(MDO_CORE_SRC
   src/renderer/viewport.c
   src/network/network_client.c
   src/network/network_server.c
+  src/scripting/debug_script.c
   src/world/world.c
   src/log.c
 )
@@ -120,12 +126,18 @@ add_library(mdo-core SHARED ${MDO_CORE_SRC})
 target_link_libraries(mdo-core
   mondradiko::sdl2
   mondradiko::vulkan
+  mondradiko::wavm
   mondradiko::libuv
   mondradiko::openxr
   mondradiko::cglm
   flecs
   tracy
 )
+
+# TODO replace with command-line argument?
+file(COPY
+  debug_script.wat
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(mdo-cli cli/main.c)
 target_link_libraries(mdo-cli mdo-core)
