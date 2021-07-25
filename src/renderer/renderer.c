@@ -248,17 +248,6 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
       return;
     }
 
-  ren->frame_index++;
-  if (ren->frame_index >= ren->frame_num)
-    ren->frame_index = 0;
-
-  struct frame_data *frame = &ren->frames[ren->frame_index];
-
-  vkWaitForFences (ren->vkd, 1, &frame->is_in_flight, VK_TRUE, UINT64_MAX);
-  vkResetFences (ren->vkd, 1, &frame->is_in_flight);
-  vkResetCommandPool (ren->vkd, frame->command_pool, 0);
-  vkResetDescriptorPool (ren->vkd, frame->descriptor_pool, 0);
-
   int viewport_num = 0;
   viewport_t *viewports[MAX_VIEWPORT_NUM];
   camera_t *viewport_cameras[MAX_VIEWPORT_NUM];
@@ -284,6 +273,20 @@ renderer_render_frame (renderer_t *ren, camera_t **cameras, int camera_num)
 
   /* cull out unacquired viewports */
   viewport_num = acquired_num;
+
+  if (viewport_num == 0)
+    return;
+
+  ren->frame_index++;
+  if (ren->frame_index >= ren->frame_num)
+    ren->frame_index = 0;
+
+  struct frame_data *frame = &ren->frames[ren->frame_index];
+
+  vkWaitForFences (ren->vkd, 1, &frame->is_in_flight, VK_TRUE, UINT64_MAX);
+  vkResetFences (ren->vkd, 1, &frame->is_in_flight);
+  vkResetCommandPool (ren->vkd, frame->command_pool, 0);
+  vkResetDescriptorPool (ren->vkd, frame->descriptor_pool, 0);
 
   viewport_uniform_t viewport_uniforms[MAX_VIEWPORT_NUM];
   for (int i = 0; i < viewport_num; i++)
