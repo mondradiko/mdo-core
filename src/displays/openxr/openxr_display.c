@@ -391,11 +391,10 @@ begin_frame (openxr_display_t *dp, struct display_poll_t *poll)
   /* nanoseconds to seconds */
   poll->dt = dp->frame_state.predictedDisplayPeriod / 1000000000.0;
 
-  /* TODO(marceline-cramer) rendering is disabled until the camera is made */
-  /*if (dp->frame_state.shouldRender == XR_TRUE)
+  if (dp->frame_state.shouldRender == XR_TRUE)
     poll->should_render = 1;
   else
-    poll->should_render = 0;*/
+    poll->should_render = 0;
 
   xrBeginFrame (dp->session, NULL);
 }
