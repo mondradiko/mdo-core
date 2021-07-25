@@ -75,6 +75,23 @@ jobs:
           cmake --build .
           cmake --install .
 
+      - name: Checkout Vulkan-Headers (Windows only)
+        uses: actions/checkout@v2
+        if: runner.os == 'Windows'
+        with:
+          repository: 'KhronosGroup/Vulkan-Headers'
+          path: 'Vulkan-Headers'
+
+      - name: Install Vulkan-Headers (Windows only)
+        if: runner.os == 'Windows'
+        working-directory: 'Vulkan-Headers'
+        run: |
+          mkdir build
+          pushd build
+          cmake -Gninja ..
+          cmake --build .
+          cmake --install .
+
       - name: apt
         if: runner.os == 'Linux'
         run: |
