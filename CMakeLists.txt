@@ -71,6 +71,7 @@ set(SHADERS_SRC
 
 if(COMPILE_SHADERS)
   spirv_shaders(SHADERS_BIN ${SHADERS_SRC})
+  add_subdirectory(shaders)
   add_library(mdo-shaders INTERFACE ${SHADERS_BIN})
 endif()
 
